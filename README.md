@@ -13,9 +13,6 @@ Can be found in [RELEASE_NOTES](RELEASE_NOTES.md).
 ## Authors
 * Anton Fedoruk - [AntonFedoruk](https://github.com/AntonFedoruk)
 
-## Acknowledgments
-...
-
 ## Contributing
 Please, follow [Contributing](CONTRIBUTING.md) page.
 
