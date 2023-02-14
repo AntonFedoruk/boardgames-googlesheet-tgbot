@@ -1,2 +1,2 @@
-## 1.0-SNAPSHOT
-*   Created template for new repositories.
+## 0.0.1-SNAPSHOT
+*   Created skeleton BGGSTGB Spring Boot project.
