@@ -1,8 +1,8 @@
 ## Overview
-Repository creates for fast running development process with configuration, which are the same from project to project.
+**This project is a MVP of telegram bot that allow users to maintain with their Google Sheet "Board games".**
 
 ## Building
-...
+.../to do
 
 ## Troubleshooting
 ...
