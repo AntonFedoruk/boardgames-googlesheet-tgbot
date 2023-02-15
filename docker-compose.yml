@@ -1,0 +1,11 @@
+version: '3.9'
+
+services:
+  # app
+  bggstgb:
+    build:
+      context: .
+    environment:
+      BOT_NAME: '${BOT_NAME}'
+      BOT_TOKEN: '${BOT_TOKEN}'
+    restart: always
