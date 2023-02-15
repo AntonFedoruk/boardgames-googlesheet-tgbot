@@ -11,7 +11,7 @@ Required software:
 
 To deploy application, switch to needed branch and run bash script:
 
-**~ bash start.sh _bot_username_ _bot_token_**
+<b>~ bash start.sh _bot_username_ _bot_token_</b>
 
 ## Release Notes
 Can be found in [RELEASE_NOTES](RELEASE_NOTES.md).
