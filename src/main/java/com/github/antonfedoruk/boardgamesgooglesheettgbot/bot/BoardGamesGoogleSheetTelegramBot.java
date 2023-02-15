@@ -33,11 +33,11 @@ public class BoardGamesGoogleSheetTelegramBot extends TelegramLongPollingBot {
         if(update.hasMessage() && update.getMessage().hasText()) {
             String message = update.getMessage().getText().trim();
             if (message.startsWith(COMMAND_PREFIX)) {
-                String commandIdentifier = message.split(" ")[0].toLowerCase();
+                String commandIdentifier = message.split(" ")[0].toLowerCase().split("@")[0];
 
-                commandContainer.retriveCommand(commandIdentifier).execute(update);
+                commandContainer.retrieveCommand(commandIdentifier).execute(update);
             } else {
-                commandContainer.retriveCommand(NO.getCommandName()).execute(update);
+                commandContainer.retrieveCommand(NO.getCommandName()).execute(update);
             }
         }
     }

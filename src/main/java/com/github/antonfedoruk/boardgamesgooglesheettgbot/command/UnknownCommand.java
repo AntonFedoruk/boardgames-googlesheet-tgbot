@@ -9,7 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 public class UnknownCommand implements Command{
     private final SendBotMessageService sendBotMessageService;
 
-    public static final String NO_MESSAGE = "Не розумію що від мене хочуть. Скористайтесь /help перш ніж писати мені такі дурниці.";
+    public static final String UNKNOWN_MESSAGE = "Не розумію що від мене хочуть. Скористайтесь /help перш ніж писати мені такі дурниці.";
 
     public UnknownCommand(SendBotMessageService sendBotMessageService) {
         this.sendBotMessageService = sendBotMessageService;
@@ -17,6 +17,6 @@ public class UnknownCommand implements Command{
 
     @Override
     public void execute(Update update) {
-sendBotMessageService.sendMessage(CommandUtils.getChatId(update), NO_MESSAGE);
+sendBotMessageService.sendMessage(CommandUtils.getChatId(update), UNKNOWN_MESSAGE);
     }
 }

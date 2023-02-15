@@ -24,7 +24,7 @@ public class CommandContainer {
         unknownCommand = new UnknownCommand(sendBotMessageService);
     }
 
-    public Command retriveCommand(String commandIdentifier) {
+    public Command retrieveCommand(String commandIdentifier) {
         return commandMap.getOrDefault(commandIdentifier, unknownCommand);
     }
 }
