@@ -1,3 +1,5 @@
-## 0.0.1-SNAPSHOT
+## Release Notes
 
-*   Created skeleton BGGSTGB Spring Boot project.
+### 0.1.0-SNAPSHOT
+*   added stub telegram bot;
+*   added skeleton BGGSTGB Spring Boot project.
