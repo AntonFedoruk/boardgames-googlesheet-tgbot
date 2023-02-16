@@ -31,7 +31,7 @@ public interface TelegramUserService {
      * @param chatId provided by Chat ID
      * @return {@link TelegramUser} with provided chat ID or null otherwise.
      */
-    Optional<TelegramUser> findByChatId(Long chatId);
+    Optional<TelegramUser> findByUserId(Long userId);
 
     /**
      * Retrieve all inactive {@link TelegramUser}

@@ -18,11 +18,11 @@ import javax.persistence.Table;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TelegramUser {
     @Id
-    @Column(name = "chat_id")
-    Long chatId;
+    @Column(name = "tg_user_id")
+    Long userId;
 
     @Column(name = "tg_user_name")
-    String tg_user_name;
+    String userName;
 
     @Column(name = "active")
     boolean active;
