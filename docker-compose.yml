@@ -3,9 +3,29 @@ version: '3.9'
 services:
   # app
   bggstgb:
+    depends_on:
+      - bg-db
     build:
       context: .
+    container_name: bggstgb-app
     environment:
       BOT_NAME: '${BOT_NAME}'
       BOT_TOKEN: '${BOT_TOKEN}'
+      BOT_DB_USERNAME: '${BOT_DB_USERNAME}'
+      BOT_DB_PASSWORD: '${BOT_DB_PASSWORD}'
     restart: always
+
+  # DB
+  bg-db:
+    image: mysql:5.7
+    restart: always
+    container_name: bggstgb-db
+    environment:
+      MYSQL_DATABASE: 'dev_bg_db'
+      MYSQL_USER: '${BOT_DB_USERNAME}'
+      MYSQL_PASSWORD: '${BOT_DB_PASSWORD}'
+      MYSQL_ROOT_PASSWORD: 'root'
+    ports:
+      - '5300:3306'
+    expose:
+      - '3306'
