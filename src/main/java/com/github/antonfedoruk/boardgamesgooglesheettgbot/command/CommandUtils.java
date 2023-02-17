@@ -25,4 +25,24 @@ public class CommandUtils {
     public static String getMessage(Update update) {
         return update.getMessage().getText();
     }
+
+    /**
+     * Retrieve username from {@link Update} object.
+     *
+     * @param update provided {@link Update}
+     * @return username from the provided {@link Update} object.
+     */
+    public static String getUserName(Update update) {
+        return update.getMessage().getFrom().getUserName();
+    }
+
+    /**
+     * Retrieve userId from {@link Update} object.
+     *
+     * @param update provided {@link Update}
+     * @return userId from the provided {@link Update} object.
+     */
+    public static Long getUserId(Update update) {
+        return update.getMessage().getFrom().getId();
+    }
 }

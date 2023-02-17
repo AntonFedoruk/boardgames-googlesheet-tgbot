@@ -2,6 +2,8 @@ package com.github.antonfedoruk.boardgamesgooglesheettgbot.bot;
 
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.command.CommandContainer;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.SendBotMessageServiceImpl;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.TelegramUserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -24,8 +26,9 @@ public class BoardGamesGoogleSheetTelegramBot extends TelegramLongPollingBot {
 
     private final CommandContainer commandContainer;
 
-    public BoardGamesGoogleSheetTelegramBot() {
-        this.commandContainer = new CommandContainer(new SendBotMessageServiceImpl(this));
+    @Autowired
+    public BoardGamesGoogleSheetTelegramBot(TelegramUserService telegramUserService) {
+        this.commandContainer = new CommandContainer(new SendBotMessageServiceImpl(this), telegramUserService);
     }
 
     @Override

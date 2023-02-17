@@ -1,0 +1,18 @@
+version: '3.9'
+
+services:
+
+  #DB
+  bg-db-dev:
+    image: mysql:5.7
+    restart: always
+    container_name: dev-bggstgb-db
+    environment:
+      MYSQL_DATABASE: 'dev_bg_db'
+      MYSQL_USER: 'dev_bg_db_user'
+      MYSQL_PASSWORD: 'dev_bg_db_password'
+      MYSQL_ROOT_PASSWORD: 'root'
+    ports:
+      - '5300:3306'
+    expose:
+      - '3306'
