@@ -19,9 +19,8 @@ services:
   bg-db:
     image: mysql:5.7
     restart: always
-    container_name: bggstgb-db
     environment:
-      MYSQL_DATABASE: 'dev_bg_db'
+      MYSQL_DATABASE: 'bg_db'
       MYSQL_USER: '${BOT_DB_USERNAME}'
       MYSQL_PASSWORD: '${BOT_DB_PASSWORD}'
       MYSQL_ROOT_PASSWORD: 'root'
