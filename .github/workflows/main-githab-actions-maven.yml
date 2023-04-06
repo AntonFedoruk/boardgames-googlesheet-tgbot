@@ -37,9 +37,10 @@ jobs:
         with:
           java-version: 1.11
 
-      - name: Start Xvfb
-        uses: marvinpinto/action-xvfb@v1
-
+      - name: Install Xvfb
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+          - name: Start Xvfb
+            run: Xvfb :99 -screen 0 1024x768x16 &
 
       - name: Build with Maven
         env:
