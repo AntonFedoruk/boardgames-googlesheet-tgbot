@@ -3,6 +3,7 @@ package com.github.antonfedoruk.boardgamesgooglesheettgbot.command;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.Game;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.GoogleApiService;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.SendBotMessageService;
+import org.springframework.beans.factory.annotation.Value;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import javax.imageio.ImageIO;
@@ -11,6 +12,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.security.GeneralSecurityException;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,6 +27,9 @@ public class GamesCommand implements Command {
     public static final String GAMES_NOT_FOUND_MESSAGE = "Ой, не можу знайти таблицю з іграми, напишіть гімнюкю що писав цей код, що це гівнокод!";
     public static final String SHEETS_SERVICE_EXCEPTION_MESSAGE = "Не можу приєднатись до гугл таблиці... Можливо помилка з Google API";
     public static final String GAMES_FOUND_MESSAGE = "Шукаю настолочки, якими вже обзавились";
+
+    @Value("${resources.gamescommand.photo.pathname}")
+    private String PHOTO_PATHNAME;
 
     public GamesCommand(SendBotMessageService sendBotMessageService, GoogleApiService googleApiService) {
         this.sendBotMessageService = sendBotMessageService;
@@ -92,7 +97,9 @@ public class GamesCommand implements Command {
             jep.setBackground(new Color(249356214));
             jep.print(graphics);
 
-            String pathname = "/home/anton/IdeaProjects/boardgames-googlesheet-tgbot/src/main/resources/Games" + (i / defaultAmountOfGamesOn1Photo + 1) + ".png";
+//            String pathname = "/src/main/resources/Games" + (i / defaultAmountOfGamesOn1Photo + 1) + ".png";
+//            String pathname = "/home/anton/IdeaProjects/boardgames-googlesheet-tgbot/src/main/resources/Games" + (i / defaultAmountOfGamesOn1Photo + 1) + ".png";
+            String pathname = PHOTO_PATHNAME + "Games" + (i / defaultAmountOfGamesOn1Photo + 1) + ".png";
 
             try {
                 ImageIO.write(image, "png", new File(pathname));
