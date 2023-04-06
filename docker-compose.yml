@@ -13,11 +13,14 @@ services:
       BOT_TOKEN: '${BOT_TOKEN}'
       BOT_DB_USERNAME: '${BOT_DB_USERNAME}'
       BOT_DB_PASSWORD: '${BOT_DB_PASSWORD}'
+      SPREADSHEETS_ID: '${SPREADSHEETS_ID}'
     restart: always
+    ports:
+      - '8090:8080'
 
   # DB
   bg-db:
-    image: mysql:5.7
+    image: mysql:8
     restart: always
     environment:
       MYSQL_DATABASE: 'bg_db'

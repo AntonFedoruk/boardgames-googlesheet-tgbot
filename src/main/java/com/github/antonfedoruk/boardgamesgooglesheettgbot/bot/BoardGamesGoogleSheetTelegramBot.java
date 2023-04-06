@@ -1,6 +1,7 @@
 package com.github.antonfedoruk.boardgamesgooglesheettgbot.bot;
 
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.command.CommandContainer;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.GoogleApiService;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.SendBotMessageServiceImpl;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.TelegramUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,16 +20,14 @@ public class BoardGamesGoogleSheetTelegramBot extends TelegramLongPollingBot {
     @Value("${bot.username}")
     private String username;
 
-    @Value("${bot.token}")
-    private String token;
-
     public static String COMMAND_PREFIX = "/";
 
     private final CommandContainer commandContainer;
 
     @Autowired
-    public BoardGamesGoogleSheetTelegramBot(TelegramUserService telegramUserService) {
-        this.commandContainer = new CommandContainer(new SendBotMessageServiceImpl(this), telegramUserService);
+    public BoardGamesGoogleSheetTelegramBot(TelegramUserService telegramUserService, GoogleApiService googleApiService, @Value("${bot.token}") String token) {
+        super(token);
+        this.commandContainer = new CommandContainer(new SendBotMessageServiceImpl(this), telegramUserService, googleApiService);
     }
 
     @Override
@@ -48,10 +47,5 @@ public class BoardGamesGoogleSheetTelegramBot extends TelegramLongPollingBot {
     @Override
     public String getBotUsername() {
         return username;
-    }
-
-    @Override
-    public String getBotToken() {
-        return token;
     }
 }

@@ -1,9 +1,7 @@
 package com.github.antonfedoruk.boardgamesgooglesheettgbot.service;
 
-import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleSheetClient;
-import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.dto.GoogleSheetDTO;
-import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.dto.GoogleSheetResponseDTO;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.Game;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleSheetClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +14,13 @@ public class GoogleApiService {
     @Autowired
     private GoogleSheetClient googleSheetClient;
 
-    public  Map<String, Game> getGamesFromGoogleSheet() throws GeneralSecurityException, IOException {
+    private void setSheetsService() throws GeneralSecurityException, IOException {
+        googleSheetClient.initSheetsService();
+    }
+
+    public Map<String, Game> getGamesFromGoogleSheet() throws GeneralSecurityException, IOException {
+        setSheetsService();
+
         return googleSheetClient.getGamesFromGoogleSheet();
     };
 

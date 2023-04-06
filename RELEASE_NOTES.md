@@ -1,5 +1,12 @@
 ## Release Notes
 
+### 0.4.0-SNAPSHOT
+*   integrate Google Sheets API to the project:
+    * added GOauthController with Oauth2 authorization;
+    * added view templates;
+*   added GamesCommand;
+*   updated Docker's part.
+  
 ### 0.3.0-SNAPSHOT
 *   added deployment process to the project.
 
