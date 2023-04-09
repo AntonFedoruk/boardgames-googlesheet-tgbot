@@ -4,7 +4,7 @@ services:
 
   #DB
   bg-db-dev:
-    image: mysql:5.7
+    image: mysql:8
     restart: always
     container_name: dev-bggstgb-db
     environment:
@@ -13,6 +13,6 @@ services:
       MYSQL_PASSWORD: 'dev_bg_db_password'
       MYSQL_ROOT_PASSWORD: 'root'
     ports:
-      - '5300:3306'
+      - '5306:3306'
     expose:
       - '3306'

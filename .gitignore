@@ -35,3 +35,10 @@ out/
 src/test/resources/application.properties
 target/
 .mvn/wrapper
+
+# Parts of GOuath
+src/main/resources/credentials.json
+tokens/
+
+# Kind of temporary files.
+src/main/resources/*.png

@@ -1,5 +1,6 @@
 package com.github.antonfedoruk.boardgamesgooglesheettgbot.command;
 
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.GoogleApiService;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.SendBotMessageService;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.TelegramUserService;
 import org.junit.jupiter.api.Assertions;
@@ -18,7 +19,8 @@ class CommandContainerTest {
     public void init() {
         SendBotMessageService sendBotMessageService = Mockito.mock(SendBotMessageService.class);
         TelegramUserService telegramUserService = Mockito.mock(TelegramUserService.class);
-        commandContainer = new CommandContainer(sendBotMessageService, telegramUserService);
+        GoogleApiService googleApiService = Mockito.mock(GoogleApiService.class);
+        commandContainer = new CommandContainer(sendBotMessageService, telegramUserService, googleApiService);
     }
 
     @Test

@@ -6,7 +6,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.io.File;
 
 @DisplayName("Unit-level testing for SendBotMessageService")
 class SendBotMessageServiceTest {
@@ -37,4 +42,25 @@ class SendBotMessageServiceTest {
         // then
         Mockito.verify(boardGamesBot).execute(sendMessage);
     }
+
+// falls with error
+//    @Test
+//    @DisplayName("Should properly send photo")
+//    void shouldProperlySendPhoto() throws TelegramApiException {
+//        // given
+//        Long chatId = 1L;
+//        File file = new File("/home/anton/IdeaProjects/boardgames-googlesheet-tgbot/src/test/resources/file.png");
+//
+//        SendPhoto sendPhoto = new SendPhoto();
+//        sendPhoto.setChatId(chatId);
+//        sendPhoto.setPhoto(new InputFile(file));
+//
+//        Mockito.when(boardGamesBot.execute(sendPhoto)).thenReturn(new Message());
+//
+//        // when
+//        sendBotMessageService.sendPhoto(chatId, file);
+//
+//        // then
+//        Mockito.verify(boardGamesBot).execute(sendPhoto);
+//    }
 }

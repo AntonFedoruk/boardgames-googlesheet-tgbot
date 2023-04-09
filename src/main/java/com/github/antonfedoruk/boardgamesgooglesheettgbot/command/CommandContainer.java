@@ -1,5 +1,6 @@
 package com.github.antonfedoruk.boardgamesgooglesheettgbot.command;
 
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.GoogleApiService;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.SendBotMessageService;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.TelegramUserService;
 
@@ -15,12 +16,13 @@ public class CommandContainer {
     private final Map<String, Command> commandMap;
     private final Command unknownCommand;
 
-    public CommandContainer(SendBotMessageService sendBotMessageService, TelegramUserService telegramUserService) {
+    public CommandContainer(SendBotMessageService sendBotMessageService, TelegramUserService telegramUserService, GoogleApiService googleApiService) {
         commandMap = new HashMap<>();
         commandMap.put(START.getCommandName(), new StartCommand(sendBotMessageService, telegramUserService));
         commandMap.put(STOP.getCommandName(), new StopCommand(sendBotMessageService, telegramUserService));
         commandMap.put(HELP.getCommandName(), new HelpCommand(sendBotMessageService));
         commandMap.put(STAT.getCommandName(), new StatCommand(sendBotMessageService, telegramUserService));
+        commandMap.put(GAMES.getCommandName(), new GamesCommand(sendBotMessageService, googleApiService));
         commandMap.put(NO.getCommandName(), new NoCommand(sendBotMessageService));
 
         unknownCommand = new UnknownCommand(sendBotMessageService);

@@ -1,0 +1,19 @@
+html {
+    min-height: 100%;
+    font-family: sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    background: linear-gradient(#87b787, #62ad1d);
+    line-height: 1.5;
+    font-size: 18px;
+}
+
+.center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 300px;
+}
