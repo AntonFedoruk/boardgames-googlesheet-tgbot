@@ -9,6 +9,7 @@ public enum CommandName {
     HELP("/help"),
     STAT("/stat"),
     GAMES("/games"),
+    UPDATE_LOCATION("/updatelocation"),
     NO("");
 
     private final String commandName;

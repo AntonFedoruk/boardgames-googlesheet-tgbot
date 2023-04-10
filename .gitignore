@@ -42,3 +42,4 @@ tokens/
 
 # Kind of temporary files.
 src/main/resources/*.png
+/*Games*.png

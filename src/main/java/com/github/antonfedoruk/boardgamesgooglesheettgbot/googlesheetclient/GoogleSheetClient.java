@@ -1,6 +1,8 @@
 package com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient;
 
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.Game;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.dto.GoogleSheetDTO;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.dto.GoogleSheetResponseDTO;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -31,6 +33,13 @@ public interface GoogleSheetClient {
 //    GoogleSheetResponseDTO createGoogleSheet(GoogleSheetDTO request) throws GeneralSecurityException, IOException;
 //
 //    GoogleSheetResponseDTO writeValuesOnSheet(GoogleSheetDTO request, String spreadsheetId) throws GeneralSecurityException, IOException;
+
+    /**
+     * Update {@link Game}'s location on the sheet.
+     *
+     * @throws GeneralSecurityException,IOException
+     */
+    String updateGameLocation(String id, String newLocation) throws GeneralSecurityException, IOException;
 
     /**
      * Retrieve all {@link Game}s data from the sheet.

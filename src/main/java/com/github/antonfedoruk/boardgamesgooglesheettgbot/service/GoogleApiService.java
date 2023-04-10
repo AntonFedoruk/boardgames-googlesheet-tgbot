@@ -14,15 +14,13 @@ public class GoogleApiService {
     @Autowired
     private GoogleSheetClient googleSheetClient;
 
-    private void setSheetsService() throws GeneralSecurityException, IOException {
-        googleSheetClient.initSheetsService();
+    public Map<String, Game> getGamesFromGoogleSheet() throws GeneralSecurityException, IOException {
+        return googleSheetClient.getGamesFromGoogleSheet();
     }
 
-    public Map<String, Game> getGamesFromGoogleSheet() throws GeneralSecurityException, IOException {
-        setSheetsService();
-
-        return googleSheetClient.getGamesFromGoogleSheet();
-    };
+    public String updateGameLocation(String id, String newLocation) throws IOException, GeneralSecurityException {
+       return googleSheetClient.updateGameLocation(id, newLocation);
+    }
 
 //    public Map<Object, Object> readDataFromGoogleSheet() throws GeneralSecurityException, IOException {
 //        return googleSheetClient.getDataFromSheet();
