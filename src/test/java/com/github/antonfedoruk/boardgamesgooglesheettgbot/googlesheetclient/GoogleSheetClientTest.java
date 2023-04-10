@@ -35,6 +35,22 @@ class GoogleSheetClientIT {
         // when
         Map<String, Game> gamesFromGoogleSheet = googleSheetClient.getGamesFromGoogleSheet();
         // then
-        Assertions.assertEquals(55, gamesFromGoogleSheet.size());
+        Assertions.assertEquals(56, gamesFromGoogleSheet.size());
+    }
+
+    @Test
+    @DisplayName("Should update games location on Google Sheet")
+    void shouldUpdateGamesLocationOnGoogleSheet() throws IOException, GeneralSecurityException {
+        // given
+        Map<String, Game> gamesFromGoogleSheet = googleSheetClient.getGamesFromGoogleSheet();
+        String gamesId = "56";
+        String previousLocation = gamesFromGoogleSheet.get(gamesId).getLastLocation();
+        String newLocation = "test";
+        // when
+        String updatedLocation = googleSheetClient.updateGameLocation(gamesId, newLocation);
+        // then
+        Assertions.assertEquals(newLocation, updatedLocation);
+        //after
+        googleSheetClient.updateGameLocation(gamesId, previousLocation);
     }
 }

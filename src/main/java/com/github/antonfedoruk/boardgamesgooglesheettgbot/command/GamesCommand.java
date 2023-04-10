@@ -12,7 +12,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.security.GeneralSecurityException;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -71,17 +70,27 @@ public class GamesCommand implements Command {
         final int defaultAmountOfGamesOn1Photo = 25;
         for (int i = 0; i < gamesFromGoogleSheet.size(); i = i + defaultAmountOfGamesOn1Photo) {
             String gameList = gamesFromGoogleSheet.values().stream().sorted().skip(i).limit(defaultAmountOfGamesOn1Photo)
-                    .map(game -> "<tr style='border-bottom: 1px solid #000'><td style='border-bottom: 1px solid #000'><b>" + game.getName() + "</b></td> <td style='text-align:center; border-bottom: 1px solid #000'>" + game.getNumberOfPlayers() + "</td> <td style='text-align:center; border-bottom: 1px solid #000'><u>" + game.getLastLocation() + "</u></td></tr>")
+                    .map(game -> "<tr style='border-bottom: 1px solid #000'>" +
+                                     "<td style='text-align:center; border-bottom: 1px solid #000'>" + game.getId() + "</td>" +
+                                     "<td style='border-bottom: 1px solid #000'><b>" + game.getName() + "</b></td>" +
+                                     "<td style='text-align:center; border-bottom: 1px solid #000'>" + game.getNumberOfPlayers() + "</td> " +
+                                     "<td style='text-align:center; border-bottom: 1px solid #000'><u>" + game.getLastLocation() + "</u></td>" +
+                                 "</tr>")
                     .collect(Collectors.joining());
 
             String htmlMessageWithTable = "<h2 style='text-align:center'>Наші настолочки #" + (i / defaultAmountOfGamesOn1Photo + 1) + "</h1>" +
                     "<table style='border: 1px solid; width: 420px'>" +
-                    "<tr><td style='border: 1px solid'><b>Назва</b></td> <td style='text-align:center; border: 1px solid'><b>К-ть гравців</b></td> <td style='text-align:center; border: 1px solid'><b>Де шукати гру</b></td></tr>" +
+                    "<tr>" +
+                        "<td style='border: 1px solid'><b>ID</b></td> " +
+                        "<td style='border: 1px solid'><b>Назва</b></td> " +
+                        "<td style='text-align:center; border: 1px solid'><b>К-ть гравців</b></td> " +
+                        "<td style='text-align:center; border: 1px solid'><b>Де шукати гру</b></td>" +
+                    "</tr>" +
                     gameList +
                     "</table>";
 
             int gamesOnThePicture = Math.min((gamesFromGoogleSheet.size() - i), defaultAmountOfGamesOn1Photo);
-            final int heightOfSingleRow = 28;
+            final int heightOfSingleRow = 29;
             final int heightOfTableHeader = 80;
             int width = 555, height = heightOfTableHeader + gamesOnThePicture * heightOfSingleRow;
             System.out.println("Games" + (i / defaultAmountOfGamesOn1Photo + 1) + ".png    -> height=" + height);
@@ -97,8 +106,6 @@ public class GamesCommand implements Command {
             jep.setBackground(new Color(249356214));
             jep.print(graphics);
 
-//            String pathname = "/src/main/resources/Games" + (i / defaultAmountOfGamesOn1Photo + 1) + ".png";
-//            String pathname = "/home/anton/IdeaProjects/boardgames-googlesheet-tgbot/src/main/resources/Games" + (i / defaultAmountOfGamesOn1Photo + 1) + ".png";
             String pathname = PHOTO_PATHNAME + "Games" + (i / defaultAmountOfGamesOn1Photo + 1) + ".png";
 
             try {

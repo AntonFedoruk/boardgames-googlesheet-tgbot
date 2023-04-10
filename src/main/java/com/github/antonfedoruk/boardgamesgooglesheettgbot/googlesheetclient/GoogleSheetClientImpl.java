@@ -3,12 +3,14 @@ package com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.Game;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.util.SheetsServiceUtil;
 import com.google.api.services.sheets.v4.Sheets;
+import com.google.api.services.sheets.v4.model.UpdateValuesResponse;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,27 +56,26 @@ public class GoogleSheetClientImpl implements GoogleSheetClient {
 //        return responseDTO;
 //    }
 
-//    @Override
-//    public GoogleSheetResponseDTO writeValuesOnSheet(GoogleSheetDTO request, String spreadsheetId) throws IOException {
-//        ValueRange body = new ValueRange()
-//                .setValues(Arrays.asList(
-//                        Arrays.asList("Expenses January"),
-//                        Arrays.asList("books", "30"),
-//                        Arrays.asList("pens", "10"),
-//                        Arrays.asList("Expenses February"),
-//                        Arrays.asList("clothes", "20"),
-//                        Arrays.asList("shoes", "5")));
-//
-//        UpdateValuesResponse result = sheetsService.spreadsheets().values()
-//                .update(spreadsheetId, "G1", body)
-//                .setValueInputOption("RAW") //how new data will be entered in a cell. Example: the input option “USER_ENTERED”, as opposed to “RAW”, meaning the cell values will be computed based on the formula.
-//                .execute();
-//
-//        GoogleSheetResponseDTO responseDTO = new GoogleSheetResponseDTO();
-//        responseDTO.setSpreadSheetId(result.getSpreadsheetId());
-//        responseDTO.setSpreadSheetUrl("https://docs.google.com/spreadsheets/d/" + result.getSpreadsheetId());
-//        return responseDTO;
-//    }
+    /**
+     * Set new game's location at spreadsheet.
+     */
+    @Override
+    public String updateGameLocation(String id, String newLocation) throws IOException, GeneralSecurityException {
+        if (sheetsService == null) {
+            initSheetsService();
+        }
+
+        ValueRange location = new ValueRange().setValues(List.of(Collections.singletonList(newLocation)));
+
+        String range = "BoardGames!E" + (Integer.parseInt(id) + 1);
+        UpdateValuesResponse valuesResponse = sheetsService.spreadsheets().values()
+                .update(SPREADSHEET_ID, range, location)
+                .setValueInputOption("RAW")
+                .setIncludeValuesInResponse(true)
+                .execute();
+
+        return valuesResponse.getUpdatedData().getValues().get(0).get(0).toString();
+    }
 
     @Override
     public void initSheetsService() throws GeneralSecurityException, IOException {
@@ -85,7 +86,11 @@ public class GoogleSheetClientImpl implements GoogleSheetClient {
      * Retrieve the games and their property from the spreadsheet.
      */
     @Override
-    public Map<String, Game> getGamesFromGoogleSheet() throws IOException {
+    public Map<String, Game> getGamesFromGoogleSheet() throws IOException, GeneralSecurityException {
+        if (sheetsService == null) {
+            initSheetsService();
+        }
+
         // Build a new authorized API client service.
         final String range = "BoardGames!A2:E";
         ValueRange response = sheetsService.spreadsheets().values()
@@ -99,7 +104,8 @@ public class GoogleSheetClientImpl implements GoogleSheetClient {
         } else {
             System.out.println("Games found.");
             for (List row : values) {
-                games.put((String) row.get(0), new Game((String) row.get(0), (String) row.get(1), (String) row.get(2), (String) row.get(3), (String) row.get(4)));
+                if (row.get(0) != null)
+                    games.put((String) row.get(0), new Game((String) row.get(0), (String) row.get(1), (String) row.get(2), (String) row.get(3), (String) row.get(4)));
             }
         }
         return games;

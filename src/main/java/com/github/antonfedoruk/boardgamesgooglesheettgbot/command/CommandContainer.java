@@ -23,6 +23,7 @@ public class CommandContainer {
         commandMap.put(HELP.getCommandName(), new HelpCommand(sendBotMessageService));
         commandMap.put(STAT.getCommandName(), new StatCommand(sendBotMessageService, telegramUserService));
         commandMap.put(GAMES.getCommandName(), new GamesCommand(sendBotMessageService, googleApiService));
+        commandMap.put(UPDATE_LOCATION.getCommandName(), new UpdateLocationCommand(sendBotMessageService, googleApiService));
         commandMap.put(NO.getCommandName(), new NoCommand(sendBotMessageService));
 
         unknownCommand = new UnknownCommand(sendBotMessageService);
