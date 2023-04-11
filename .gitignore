@@ -40,6 +40,4 @@ target/
 src/main/resources/credentials.json
 tokens/
 
-# Kind of temporary files.
-src/main/resources/*.png
-/*Games*.png
+src/main/resources/created-pictures/*

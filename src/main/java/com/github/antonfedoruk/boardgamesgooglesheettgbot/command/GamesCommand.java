@@ -3,7 +3,6 @@ package com.github.antonfedoruk.boardgamesgooglesheettgbot.command;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.Game;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.GoogleApiService;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.SendBotMessageService;
-import org.springframework.beans.factory.annotation.Value;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import javax.imageio.ImageIO;
@@ -27,12 +26,14 @@ public class GamesCommand implements Command {
     public static final String SHEETS_SERVICE_EXCEPTION_MESSAGE = "Не можу приєднатись до гугл таблиці... Можливо помилка з Google API";
     public static final String GAMES_FOUND_MESSAGE = "Шукаю настолочки, якими вже обзавились";
 
-    @Value("${resources.gamescommand.photo.pathname}")
     private String PHOTO_PATHNAME;
 
     public GamesCommand(SendBotMessageService sendBotMessageService, GoogleApiService googleApiService) {
         this.sendBotMessageService = sendBotMessageService;
         this.googleApiService = googleApiService;
+//        this.PHOTO_PATHNAME = googleApiService.getPHOTO_PATHNAME();
+        String projectDir = System.getProperty("user.dir");
+        PHOTO_PATHNAME = projectDir + "/src/main/resources/created-pictures/";
     }
 
     @Override
@@ -93,14 +94,11 @@ public class GamesCommand implements Command {
             final int heightOfSingleRow = 29;
             final int heightOfTableHeader = 80;
             int width = 555, height = heightOfTableHeader + gamesOnThePicture * heightOfSingleRow;
-            System.out.println("Games" + (i / defaultAmountOfGamesOn1Photo + 1) + ".png    -> height=" + height);
 
             BufferedImage image = GraphicsEnvironment.getLocalGraphicsEnvironment()
                     .getDefaultScreenDevice().getDefaultConfiguration()
                     .createCompatibleImage(width, height);
-
             Graphics graphics = image.createGraphics();
-
             JEditorPane jep = new JEditorPane("text/html", htmlMessageWithTable);
             jep.setSize(width, height);
             jep.setBackground(new Color(249356214));
@@ -109,7 +107,14 @@ public class GamesCommand implements Command {
             String pathname = PHOTO_PATHNAME + "Games" + (i / defaultAmountOfGamesOn1Photo + 1) + ".png";
 
             try {
-                ImageIO.write(image, "png", new File(pathname));
+                /////
+                File directory = new File(pathname);
+                if (!directory.exists()) {
+                    directory.mkdirs();
+                }
+                ImageIO.write(image, "png", directory );
+                /////
+//                ImageIO.write(image, "png", new File(pathname));
                 sendBotMessageService.sendPhoto(CommandUtils.getChatId(update), new File(pathname));
             } catch (IOException e) {
                 throw new RuntimeException(e);
