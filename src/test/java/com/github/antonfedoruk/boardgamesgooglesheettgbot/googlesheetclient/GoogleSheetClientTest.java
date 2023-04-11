@@ -24,11 +24,6 @@ class GoogleSheetClientIT {
     @Autowired
     private GoogleSheetClient googleSheetClient;
 
-    @BeforeEach
-    void init() throws GeneralSecurityException, IOException {
-        googleSheetClient.initSheetsService();
-    }
-
     @Test
     @DisplayName("Should retrieve all games from Google Sheet")
     void shouldRetrieveAllGamesFromGoogleSheet() throws IOException, GeneralSecurityException {

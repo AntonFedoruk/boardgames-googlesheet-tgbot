@@ -24,6 +24,8 @@ public class CommandContainer {
         commandMap.put(STAT.getCommandName(), new StatCommand(sendBotMessageService, telegramUserService));
         commandMap.put(GAMES.getCommandName(), new GamesCommand(sendBotMessageService, googleApiService));
         commandMap.put(UPDATE_LOCATION.getCommandName(), new UpdateLocationCommand(sendBotMessageService, googleApiService));
+        commandMap.put(WINNERS.getCommandName(), new WinnersCommand(sendBotMessageService, googleApiService));
+        commandMap.put(WIN.getCommandName(), new WinCommand(sendBotMessageService, googleApiService));
         commandMap.put(NO.getCommandName(), new NoCommand(sendBotMessageService));
 
         unknownCommand = new UnknownCommand(sendBotMessageService);

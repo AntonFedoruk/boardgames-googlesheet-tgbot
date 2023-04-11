@@ -10,6 +10,8 @@ public enum CommandName {
     STAT("/stat"),
     GAMES("/games"),
     UPDATE_LOCATION("/updatelocation"),
+    WINNERS("/winners"),
+    WIN("/win"),
     NO("");
 
     private final String commandName;
