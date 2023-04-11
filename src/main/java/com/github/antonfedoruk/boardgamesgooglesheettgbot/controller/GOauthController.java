@@ -10,7 +10,7 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.services.sheets.v4.Sheets;
-import com.google.api.services.sheets.v4.model.ValueRange;
+import com.google.api.services.sheets.v4.model.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -25,6 +25,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -98,11 +99,14 @@ public class GOauthController {
         } catch (
                 GoogleJsonResponseException e) {
             if (e.getStatusCode() == 403) {
+                e.printStackTrace();
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access to the resource is forbidden", e);
             } else {
+                e.printStackTrace();
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error occurred while retrieving the game list", e);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error occurred while retrieving the game list", e);
         }
         return "games";

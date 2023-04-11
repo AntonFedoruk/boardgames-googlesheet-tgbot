@@ -8,17 +8,21 @@ import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.Command
 /**
  * Help {@link Command}.
  */
-public class HelpCommand implements Command{
+public class HelpCommand implements Command {
     private final SendBotMessageService sendBotMessageService;
 
-    public static final String HELP_MESSAGE = String.format("<b>Дотупні команди</b>\n\n"
-                    + "<i>Почати\\зупинить роботу з ботом:</i>\n"
-                    + "%s - розпочати роботу зі мною;\n"
+    public static final String HELP_MESSAGE = String.format("<b>Дотупні команди</b>\n"
+                    + "<i>Пов'язані з настолочками:</i>\n"
                     + "%s - список наших ігор;\n"
+                    + "%s - відобразити записи про перемоги;\n"
+                    + "%s - добавити запис про перемогу.\n"
+                    + "<i>Загальні:</i>\n"
+                    + "%s - розпочати роботу зі мною;\n"
                     + "%s - призупинити роботу зі мною;\n"
-                    + "%s - відобразити активних учасників;\n"
+                    + "%s - відобразити активних учасників бота;\n"
                     + "%s - дізнатись що я можу.\n",
-            START.getCommandName(),GAMES.getCommandName(), STOP.getCommandName(), STAT.getCommandName(), HELP.getCommandName());
+            GAMES.getCommandName(), WINNERS.getCommandName(), WIN.getCommandName(),
+            START.getCommandName(), STOP.getCommandName(), STAT.getCommandName(), HELP.getCommandName());
 
     public HelpCommand(SendBotMessageService sendBotMessageService) {
         this.sendBotMessageService = sendBotMessageService;
@@ -26,6 +30,6 @@ public class HelpCommand implements Command{
 
     @Override
     public void execute(Update update) {
-sendBotMessageService.sendMessage(CommandUtils.getChatId(update), HELP_MESSAGE);
+        sendBotMessageService.sendMessage(CommandUtils.getChatId(update), HELP_MESSAGE);
     }
 }
