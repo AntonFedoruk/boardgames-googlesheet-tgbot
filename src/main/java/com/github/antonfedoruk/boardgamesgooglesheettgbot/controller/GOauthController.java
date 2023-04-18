@@ -1,16 +1,17 @@
 package com.github.antonfedoruk.boardgamesgooglesheettgbot.controller;
 
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.command.NoCommand;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiException;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.util.GoogleAuthorizeUtil;
-import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.util.SheetsServiceUtil;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.GoogleApiService;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.services.sheets.v4.Sheets;
-import com.google.api.services.sheets.v4.model.*;
+import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -25,46 +26,49 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 @Controller
 @ControllerAdvice
 public class GOauthController {
-    private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport(); //this var makes API calls
+    private static final Logger log = LoggerFactory.getLogger(NoCommand.class);
+    private final String USER_IDENTIFY_KEY;
+    private final String CALLBACK_URI;
 
-    @Value("${google.user.identify.key}")
-    private String USER_IDENTIFY_KEY;
-
-    @Value("${google.spreadsheets.id}")
-    private String SPREADSHEET_ID;
-
-    @Value("${google.oauth.callback.uri}")
-    private String CALLBACK_URI;
-
+    @Getter
     private GoogleAuthorizationCodeFlow flow;
+
+    @Autowired
+    private GoogleApiService googleApiService;
+
+    public GOauthController(@Value("${google.user.identify.key}") String userIdentifyKey,
+                            @Value("${google.oauth.callback.uri}") String callbackUri) {
+        USER_IDENTIFY_KEY = userIdentifyKey;
+        CALLBACK_URI = callbackUri;
+    }
 
     @PostConstruct
     public void init() throws IOException {
-        flow = GoogleAuthorizeUtil.getGoogleAuthorizationCodeFlow(HTTP_TRANSPORT);
+        log.trace("@PostConstruct init() in GOauthController invoked to initialize GoogleAuthorizationCodeFlow.");
+        flow = GoogleAuthorizeUtil.getGoogleAuthorizationCodeFlow();
     }
 
     @GetMapping(value = "/")
     public String showHomePage() throws IOException {
-        boolean isUserAuthenticated = false;
-
+        log.trace("GetMapping for '/' page. Home page should be shown.");
         Credential credential = flow.loadCredential(USER_IDENTIFY_KEY);
         if (credential != null) {
-            boolean tokenValid = credential.refreshToken();
-            if (tokenValid) {
-                isUserAuthenticated = true;
+            if (credential.refreshToken()) {
+                log.trace("User IS authenticated -> redirect on: 'boardgames.html'.");
+                return "boardgames";
             }
         }
-        return isUserAuthenticated ? "boardgames" : "index";
+        log.trace("User IS NOT authenticated -> redirect on: 'index.html'.");
+        return "index";
     }
 
     @GetMapping(value = "/googlesignin")
     public void doGoogleSignIn(HttpServletResponse response) throws IOException {
+        log.trace("GetMapping for '/googlesignin' page. User will be redirected to Google sign in page.");
         GoogleAuthorizationCodeRequestUrl url = flow.newAuthorizationUrl();
         String redirectUrl = url.setRedirectUri(CALLBACK_URI).setAccessType("offline").build();
         response.sendRedirect(redirectUrl);
@@ -72,52 +76,63 @@ public class GOauthController {
 
     @GetMapping(value = "/oauth")
     public String saveAuthorizationCode(HttpServletRequest request) throws IOException {
+        log.trace("GetMapping for '/oauth' page. This request contains authorization 'code' that should be saved for further token request to Google.");
         String code = request.getParameter("code");
         if (code != null) {
             saveToken(code);
+            log.trace("Redirect on: 'boardgames.html'.");
             return "boardgames";
         }
+        log.trace("Redirect on: 'index.html'.");
         return "index";
     }
 
     private void saveToken(String code) throws IOException {
+        log.trace("Sending token request...");
         GoogleTokenResponse response = flow.newTokenRequest(code).setRedirectUri(CALLBACK_URI).execute();
         flow.createAndStoreCredential(response, USER_IDENTIFY_KEY);
+        log.trace("Obtained response(that contain token) was saved to credential directory.");
     }
 
     @GetMapping(value = "/games")
-    public String gameList(Model model){
+    public String gameList(Model model) {
+        log.trace("GetMapping for '/games' page.");
         try {
-            Sheets sheetsService = SheetsServiceUtil.getSheetsService(USER_IDENTIFY_KEY);
-            // Build a new authorized API client service.
-            final String range = "BoardGames!A2:E";
-            ValueRange response = sheetsService.spreadsheets().values()
-                    .get(SPREADSHEET_ID, range)
-                    .execute();
-            List<List<Object>> values = response.getValues();
-            model.addAttribute("gamesCount", values.size());
-        } catch (
-                GoogleJsonResponseException e) {
-            if (e.getStatusCode() == 403) {
-                e.printStackTrace();
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access to the resource is forbidden", e);
-            } else {
-                e.printStackTrace();
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error occurred while retrieving the game list", e);
+            Credential credential = flow.loadCredential(USER_IDENTIFY_KEY);
+            if (credential != null) {
+                if (credential.refreshToken()) {
+                    log.trace("User IS authenticated -> access to games is available.");
+                }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            int gamesCount = googleApiService.getGamesFromGoogleSheet().size();
+            model.addAttribute("gamesCount", gamesCount);
+            log.trace("Added 'gamesCount':'" + gamesCount + "' to Model.");
+            // todo
+//        } catch (GoogleJsonResponseException e) {
+//            if (e.getStatusCode() == 403) {
+//                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access to the resource is forbidden", e);
+//            } else {
+//                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error occurred while retrieving the game list", e);
+//            }
+        } catch (GoogleApiException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error occurred while retrieving the game list", e);
         }
+        log.trace("Redirect on: 'games.html'.");
         return "games";
     }
 
     @ExceptionHandler(ResponseStatusException.class)
-    public ModelAndView handleResponseStatusException(ResponseStatusException ex, HttpServletRequest request){
+    public ModelAndView handleResponseStatusException(ResponseStatusException ex, HttpServletRequest request) {
+        log.error(ex.getMessage(), ex);
         ModelAndView mav = new ModelAndView();
         mav.addObject("exception", ex);
         mav.addObject("url", request.getRequestURL());
         mav.setViewName("index");
+        log.trace("Redirect on: 'index.html'.");
         return mav;
     }
 }

@@ -2,6 +2,8 @@ package com.github.antonfedoruk.boardgamesgooglesheettgbot.command;
 
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.SendBotMessageService;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.TelegramUserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.CommandUtils.getChatId;
@@ -10,6 +12,7 @@ import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.Command
  * Stop {@link Command}.
  */
 public class StopCommand implements Command {
+    private static final Logger log = LoggerFactory.getLogger(StopCommand.class);
     private final SendBotMessageService sendBotMessageService;
     private final TelegramUserService telegramUserService;
 
@@ -27,5 +30,10 @@ public class StopCommand implements Command {
             telegramUser.setActive(false);
             telegramUserService.save(telegramUser);
         });
+    }
+
+    @Override
+    public Logger getLogger() {
+        return log;
     }
 }

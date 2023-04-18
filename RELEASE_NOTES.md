@@ -1,4 +1,11 @@
 ## Release Notes
+### 0.7.0-SNAPSHOT
+*   added Logging to the project:
+    * added logging at all stages of the project;
+    * added FILE-ROLLING appender (log file location '/log/app.log');
+    * implemented Decorator pattern (LoggingCommandDecorator) to the Command.
+*   wrapped 'GeneralSecurityException | IOException' into GoogleApiException;
+*   minor bugfix.
 
 ### 0.6.0-SNAPSHOT
 *   implemented winning statistic:

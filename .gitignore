@@ -41,3 +41,4 @@ src/main/resources/credentials.json
 tokens/
 
 src/main/resources/created-pictures/*
+/logs/

@@ -1,16 +1,13 @@
 package com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient;
 
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.Game;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.EnabledIf;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
+import java.io.File;
 import java.util.Map;
 
 /**
@@ -25,8 +22,9 @@ class GoogleSheetClientIT {
     private GoogleSheetClient googleSheetClient;
 
     @Test
+    @EnabledIf("isFileExists")
     @DisplayName("Should retrieve all games from Google Sheet")
-    void shouldRetrieveAllGamesFromGoogleSheet() throws IOException, GeneralSecurityException {
+    void shouldRetrieveAllGamesFromGoogleSheet() throws GoogleApiException {
         // when
         Map<String, Game> gamesFromGoogleSheet = googleSheetClient.getGamesFromGoogleSheet();
         // then
@@ -34,8 +32,9 @@ class GoogleSheetClientIT {
     }
 
     @Test
+    @EnabledIf("isFileExists")
     @DisplayName("Should update games location on Google Sheet")
-    void shouldUpdateGamesLocationOnGoogleSheet() throws IOException, GeneralSecurityException {
+    void shouldUpdateGamesLocationOnGoogleSheet() throws GoogleApiException {
         // given
         Map<String, Game> gamesFromGoogleSheet = googleSheetClient.getGamesFromGoogleSheet();
         String gamesId = "56";
@@ -47,5 +46,11 @@ class GoogleSheetClientIT {
         Assertions.assertEquals(newLocation, updatedLocation);
         //after
         googleSheetClient.updateGameLocation(gamesId, previousLocation);
+    }
+
+    boolean isFileExists() {
+        String path = "tokens/path/StoredCredential";
+        File file = new File(path);
+        return file.exists();
     }
 }
