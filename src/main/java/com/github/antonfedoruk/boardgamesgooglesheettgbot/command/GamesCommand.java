@@ -1,8 +1,12 @@
 package com.github.antonfedoruk.boardgamesgooglesheettgbot.command;
 
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.command.annotation.GoogleAPICommand;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.Game;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiException;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.GoogleApiService;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.SendBotMessageService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import javax.imageio.ImageIO;
@@ -11,14 +15,17 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.CommandUtils.getChatId;
 
 /**
  * Games {@link Command}.
  */
+@GoogleAPICommand
 public class GamesCommand implements Command {
+    private static final Logger log = LoggerFactory.getLogger(GamesCommand.class);
     private final SendBotMessageService sendBotMessageService;
     private final GoogleApiService googleApiService;
 
@@ -31,7 +38,7 @@ public class GamesCommand implements Command {
     public GamesCommand(SendBotMessageService sendBotMessageService, GoogleApiService googleApiService) {
         this.sendBotMessageService = sendBotMessageService;
         this.googleApiService = googleApiService;
-//        this.PHOTO_PATHNAME = googleApiService.getPHOTO_PATHNAME();
+//        this.PHOTO_PATHNAME = googleApiService.getPHOTO_PATHNAME(); //bugfix: can't find pictures. need to check again later + at prepareAndSendPicturesOfGames() also
         String projectDir = System.getProperty("user.dir");
         PHOTO_PATHNAME = projectDir + "/src/main/resources/created-pictures/";
     }
@@ -43,49 +50,56 @@ public class GamesCommand implements Command {
         try {
             try {
                 gamesFromGoogleSheet = googleApiService.getGamesFromGoogleSheet();
-            } catch (GeneralSecurityException | IOException e) {
-                e.printStackTrace();
-                sendBotMessageService.sendMessage(CommandUtils.getChatId(update), SHEETS_SERVICE_EXCEPTION_MESSAGE);
+                log.trace("Games have been obtained from Google Sheets.");
+            } catch (GoogleApiException e) {
+                log.error(e.getMessage(), e);
+                sendBotMessageService.sendMessage(getChatId(update), SHEETS_SERVICE_EXCEPTION_MESSAGE);
                 return;
             }
 
-            if (!gamesFromGoogleSheet.isEmpty()) {
-                sendBotMessageService.sendMessage(CommandUtils.getChatId(update), GAMES_FOUND_MESSAGE);
+            if (gamesFromGoogleSheet.isEmpty()) {
+                log.trace("Ops, looks like there is no Games in Google Sheet.");
+                sendBotMessageService.sendMessage(getChatId(update), GAMES_NOT_FOUND_MESSAGE);
+            } else {
+                sendBotMessageService.sendMessage(getChatId(update), GAMES_FOUND_MESSAGE);
                 prepareAndSendPicturesOfGames(update, gamesFromGoogleSheet);
             }
-        } catch (
-                AWTError error) { //#Exception in thread ... java.awt.AWTError: Can't connect to X11 window server using ':0.0' as the value of the DISPLAY variable.
-            error.printStackTrace();
+        } catch ( AWTError e) { //#Exception in thread ... java.awt.AWTError: Can't connect to X11 window server using ':0.0' as the value of the DISPLAY variable.
+            log.error("ERROR occurred!!!", e);
             String message = "<b>Список ігор</b>: \n";
             String gameList = gamesFromGoogleSheet.values().stream().sorted()
                     .map(game -> "<b>" + game.getName() + "</b> (<i>" + game.getNumberOfPlayers() + "</i> | <u> " + game.getLastLocation() + "</u>)")
                     .collect(Collectors.joining("\n"));
-            sendBotMessageService.sendMessage(CommandUtils.getChatId(update), message + gameList);
-        }
-        if (gamesFromGoogleSheet.isEmpty()) {
-            sendBotMessageService.sendMessage(CommandUtils.getChatId(update), GAMES_NOT_FOUND_MESSAGE);
+            log.trace("Due to " + e.getMessage() + " error user should obtain gameList as 'message'.");
+            sendBotMessageService.sendMessage(getChatId(update), message + gameList);
         }
     }
 
+    @Override
+    public Logger getLogger() {
+        return log;
+    }
+
     private void prepareAndSendPicturesOfGames(Update update, Map<String, Game> gamesFromGoogleSheet) {
+        log.trace("Invoked prepareAndSendPicturesOfGames() -> ");
         final int defaultAmountOfGamesOn1Photo = 25;
         for (int i = 0; i < gamesFromGoogleSheet.size(); i = i + defaultAmountOfGamesOn1Photo) {
             String gameList = gamesFromGoogleSheet.values().stream().sorted().skip(i).limit(defaultAmountOfGamesOn1Photo)
                     .map(game -> "<tr style='border-bottom: 1px solid #000'>" +
-                                     "<td style='text-align:center; border-bottom: 1px solid #000'>" + game.getId() + "</td>" +
-                                     "<td style='border-bottom: 1px solid #000'><b>" + game.getName() + "</b></td>" +
-                                     "<td style='text-align:center; border-bottom: 1px solid #000'>" + game.getNumberOfPlayers() + "</td> " +
-                                     "<td style='text-align:center; border-bottom: 1px solid #000'><u>" + game.getLastLocation() + "</u></td>" +
-                                 "</tr>")
+                            "<td style='text-align:center; border-bottom: 1px solid #000'>" + game.getId() + "</td>" +
+                            "<td style='border-bottom: 1px solid #000'><b>" + game.getName() + "</b></td>" +
+                            "<td style='text-align:center; border-bottom: 1px solid #000'>" + game.getNumberOfPlayers() + "</td> " +
+                            "<td style='text-align:center; border-bottom: 1px solid #000'><u>" + game.getLastLocation() + "</u></td>" +
+                            "</tr>")
                     .collect(Collectors.joining());
 
             String htmlMessageWithTable = "<h2 style='text-align:center'>Наші настолочки #" + (i / defaultAmountOfGamesOn1Photo + 1) + "</h1>" +
                     "<table style='border: 1px solid; width: 420px'>" +
                     "<tr>" +
-                        "<td style='border: 1px solid'><b>ID</b></td> " +
-                        "<td style='border: 1px solid'><b>Назва</b></td> " +
-                        "<td style='text-align:center; border: 1px solid'><b>К-ть гравців</b></td> " +
-                        "<td style='text-align:center; border: 1px solid'><b>Де шукати гру</b></td>" +
+                    "<td style='border: 1px solid'><b>ID</b></td> " +
+                    "<td style='border: 1px solid'><b>Назва</b></td> " +
+                    "<td style='text-align:center; border: 1px solid'><b>К-ть гравців</b></td> " +
+                    "<td style='text-align:center; border: 1px solid'><b>Де шукати гру</b></td>" +
                     "</tr>" +
                     gameList +
                     "</table>";
@@ -112,12 +126,13 @@ public class GamesCommand implements Command {
                 if (!directory.exists()) {
                     directory.mkdirs();
                 }
-                ImageIO.write(image, "png", directory );
+                ImageIO.write(image, "png", directory);
+                log.trace("Image '" + pathname + "' created.");
                 /////
 //                ImageIO.write(image, "png", new File(pathname));
-                sendBotMessageService.sendPhoto(CommandUtils.getChatId(update), new File(pathname));
+                sendBotMessageService.sendPhoto(getChatId(update), new File(pathname));
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                log.error("Exception occurs trying to get photo by it path: '" + pathname + "'.", e);
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.github.antonfedoruk.boardgamesgooglesheettgbot.command;
 
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.Game;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiException;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.GoogleApiService;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.SendBotMessageService;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +38,7 @@ class GamesCommandTest {
 
     @Test
     @DisplayName("Should send proper message when game list is empty")
-    void shouldSendProperMessageWhenGameListIsEmpty() throws GeneralSecurityException, IOException {
+    void shouldSendProperMessageWhenGameListIsEmpty() throws GoogleApiException {
         // given
         Map<String, Game> gamesFromGoogleSheet;
         Mockito.when(googleApiService.getGamesFromGoogleSheet()).thenReturn(new HashMap<>());
@@ -53,7 +54,7 @@ class GamesCommandTest {
 
     @Test
     @DisplayName("Should send image when game list is not empty")
-    void shouldSendImageWhenGameListIsNotEmpty() throws GeneralSecurityException, IOException {
+    void shouldSendImageWhenGameListIsNotEmpty() throws GoogleApiException {
         // given
         Map<String, Game> games = new HashMap<>();
         Game game = new Game("1", "Inish", "2-5", "Nick", "At the office");
@@ -69,10 +70,10 @@ class GamesCommandTest {
         Mockito.verify(sendBotMessageService).sendPhoto(any(), any(File.class));
     }
 
-    private Update prepearedUpdate(Long chetId) {
+    private Update prepearedUpdate(Long chatId) {
         Update update = new Update();
         Message message = Mockito.mock(Message.class);
-        Mockito.when(message.getChatId()).thenReturn(1L);
+        Mockito.when(message.getChatId()).thenReturn(chatId);
         Mockito.when(message.getText()).thenReturn(GAMES.getCommandName());
         update.setMessage(message);
         return update;

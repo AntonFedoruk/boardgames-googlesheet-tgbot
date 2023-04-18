@@ -1,9 +1,13 @@
 package com.github.antonfedoruk.boardgamesgooglesheettgbot.command;
 
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.command.annotation.GoogleAPICommand;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.Game;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.WinRecord;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiException;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.GoogleApiService;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.SendBotMessageService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.io.IOException;
@@ -21,7 +25,9 @@ import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.UpdateL
  * Win {@link Command}.
  * This command add a note about player's victory to the corresponding tablet in Google Sheets.
  */
+@GoogleAPICommand
 public class WinCommand implements Command {
+    private static final Logger log = LoggerFactory.getLogger(WinCommand.class);
     private final SendBotMessageService sendBotMessageService;
     private final GoogleApiService googleApiService;
 
@@ -41,6 +47,7 @@ public class WinCommand implements Command {
     public void execute(Update update) {
         String commandFromUser = getMessage(update);
         if (commandFromUser.equalsIgnoreCase(WIN.getCommandName())) {
+            log.error(commandFromUser + " was send without parameters, so instruction message should be sent.");
             sendBotMessageService.sendMessage(getChatId(update), HOW_TO_USE_MESSAGE);
             return;
         }
@@ -63,9 +70,14 @@ public class WinCommand implements Command {
             if (googleApiService.addWinRecordToTheSheet(gameName, gameResult)){
                 sendBotMessageService.sendMessage(getChatId(update), ADDED_RECORD_MESSAGE);
             }
-        } catch (GeneralSecurityException | IOException e) {
+        } catch (GoogleApiException e) {
+            log.error(e.getMessage());
             sendBotMessageService.sendMessage(getChatId(update), IO_OR_GENERAL_SECURITY_EXCEPTION_MESSAGE);
-            e.printStackTrace();
         }
+    }
+
+    @Override
+    public Logger getLogger() {
+        return log;
     }
 }
