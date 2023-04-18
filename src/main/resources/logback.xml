@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <property name="LOG_FILE" value="logs/app.log"/>
+
+    <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE}</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/archived/app.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- each archived file, size max 500KB -->
+            <maxFileSize>500KB</maxFileSize>
+            <!-- total size of all archive files, if total size > 10MB,
+				it will delete old archived file -->
+            <totalSizeCap>10MB</totalSizeCap>
+            <!-- 60 days to keep -->
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>
+                %d %-5level [%t] [%replace(user:%X{user}; command:%X{message}){'user:; command:','-'}] %logger{0} [%file:%line] : %replace(%.-500msg){'\n',''}%n
+            </pattern>
+        </encoder>
+
+    </appender>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>
+                %d{yyyy-MM-dd HH:mm:ss.SSS} %5p --- [%t] %logger{35} : %msg%n
+            </pattern>
+        </layout>
+    </appender>
+
+    <logger name="com.github.antonfedoruk.boardgamesgooglesheettgbot" level="trace" additivity="false">
+        <appender-ref ref="FILE-ROLLING"/>
+    </logger>
+    <root level="error">
+        <appender-ref ref="FILE-ROLLING"/>
+    </root>
+    <root level="info">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>

@@ -1,9 +1,13 @@
 package com.github.antonfedoruk.boardgamesgooglesheettgbot.command;
 
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.command.annotation.GoogleAPICommand;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.Game;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.WinRecord;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiException;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.GoogleApiService;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.SendBotMessageService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import javax.imageio.ImageIO;
@@ -26,11 +30,13 @@ import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.UpdateL
 /**
  * Winner {@link Command}.
  */
+@GoogleAPICommand
 public class WinnersCommand implements Command {
+    private static final Logger log = LoggerFactory.getLogger(WinnersCommand.class);
     private final SendBotMessageService sendBotMessageService;
     private final GoogleApiService googleApiService;
 
-    private String PHOTO_PATHNAME;
+    private final String PHOTO_PATHNAME;
 
     public static final String HOW_TO_USE_MESSAGE = "Щоб переглянути історію перемог по певній грі скористайтесь наступною командою: \n" +
             WINNERS.getCommandName() + " <i>#_гри</i>\n" +
@@ -66,10 +72,15 @@ public class WinnersCommand implements Command {
                 sendBotMessageService.sendMessage(getChatId(update), WIN_RECORDS_FOUND_MESSAGE);
                 prepareAndSendPicturesOfWinRecords(update, winRecordsForGameFromGoogleSheet, gameName);
             }
-        } catch (GeneralSecurityException | IOException e) {
+        } catch (GoogleApiException e) {
+            log.error(e.getMessage(), e);
             sendBotMessageService.sendMessage(getChatId(update), IO_OR_GENERAL_SECURITY_EXCEPTION_MESSAGE);
-            e.printStackTrace();
         }
+    }
+
+    @Override
+    public Logger getLogger() {
+        return log;
     }
 
     private void prepareAndSendPicturesOfWinRecords(Update update, List<WinRecord> winRecordsForGameFromGoogleSheet, String gameName) {
@@ -77,7 +88,7 @@ public class WinnersCommand implements Command {
         for (int i = 0; i < winRecordsForGameFromGoogleSheet.size(); i = i + defaultAmountOfRecordsOn1Photo) {
             String gameList = winRecordsForGameFromGoogleSheet.stream().sorted(Comparator.comparing(WinRecord::getDate).reversed()).skip(i).limit(defaultAmountOfRecordsOn1Photo)
                     .map(winRecord -> "<tr style='border-bottom: 1px solid #000'>" +
-                                          "<td style='text-align:center; border-bottom: 1px solid #000'>" + winRecord.getDate().toString() + "</td>" +
+                                          "<td style='text-align:center; border-bottom: 1px solid #000'>" + winRecord.getDate() + "</td>" +
                                           "<td style='border-bottom: 1px solid #000'><b>" + winRecord.getWinner() + "</b></td>" +
                                           "<td style='text-align:center; border-bottom: 1px solid #000'><i>" + winRecord.getScore() + "</i></td>" +
                                           "<td style='border-bottom: 1px solid #000'>" + winRecord.getPlayers() + "</td> " +
@@ -116,7 +127,7 @@ public class WinnersCommand implements Command {
                 ImageIO.write(image, "png", new File(pathname));
                 sendBotMessageService.sendPhoto(CommandUtils.getChatId(update), new File(pathname));
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                log.error("Exception occurs as it new image can't be created in '" + pathname + "'.");
             }
         }
     }

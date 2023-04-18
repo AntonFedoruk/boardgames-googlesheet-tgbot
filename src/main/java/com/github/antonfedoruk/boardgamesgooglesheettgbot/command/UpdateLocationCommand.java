@@ -1,14 +1,17 @@
 package com.github.antonfedoruk.boardgamesgooglesheettgbot.command;
 
-import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.Game;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.command.annotation.GoogleAPICommand;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiException;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.GoogleApiService;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.SendBotMessageService;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import java.util.Map;
 
 import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.CommandName.UPDATE_LOCATION;
 import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.CommandUtils.getChatId;
@@ -17,7 +20,9 @@ import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.Command
 /**
  * UpdateLocation {@link Command}.
  */
+@GoogleAPICommand
 public class UpdateLocationCommand implements Command {
+    private final Logger log = LoggerFactory.getLogger(UpdateLocationCommand.class);
     private final SendBotMessageService sendBotMessageService;
     private final GoogleApiService googleApiService;
 
@@ -40,6 +45,7 @@ public class UpdateLocationCommand implements Command {
     public void execute(Update update) {
         String commandFromUser = getMessage(update);
         if (commandFromUser.equalsIgnoreCase(UPDATE_LOCATION.getCommandName())) {
+            log.trace("User send command with no parameters.");
             sendBotMessageService.sendMessage(getChatId(update), HOW_TO_USE_MESSAGE);
             return;
         }
@@ -58,9 +64,9 @@ public class UpdateLocationCommand implements Command {
                 sendBotMessageService.sendMessage(getChatId(update), OUT_OF_RANGE_GAME_ID_MESSAGE);
                 return;
             }
-        } catch (GeneralSecurityException | IOException e) {
+        } catch (GoogleApiException e) {
+            log.error(e.getMessage());
             sendBotMessageService.sendMessage(getChatId(update), IO_OR_GENERAL_SECURITY_EXCEPTION_MESSAGE);
-            e.printStackTrace();
             return;
         }
 
@@ -74,9 +80,14 @@ public class UpdateLocationCommand implements Command {
         try {
             String storedLocation = googleApiService.updateGameLocation(gamesId, gamesNewLocation);
             sendBotMessageService.sendMessage(getChatId(update), String.format(LOCATION_CHANGED_MESSAGE, gamesId, storedLocation));
-        } catch (IOException | GeneralSecurityException e) {
+        } catch (GoogleApiException e) {
+            log.error(e.getMessage());
             sendBotMessageService.sendMessage(getChatId(update), IO_OR_GENERAL_SECURITY_EXCEPTION_MESSAGE);
-            e.printStackTrace();
         }
+    }
+
+    @Override
+    public Logger getLogger() {
+        return log;
     }
 }

@@ -1,6 +1,7 @@
 package com.github.antonfedoruk.boardgamesgooglesheettgbot.command;
 
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.Game;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiException;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.GoogleApiService;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.SendBotMessageService;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +45,7 @@ class UpdateLocationCommandTest {
             Game game = new Game("1", "Inish", "2-5", "Nick", "At the office");
             games.put("1", game);
             Mockito.when(googleApiService.getGamesFromGoogleSheet()).thenReturn(games);
-        } catch (GeneralSecurityException | IOException e) {
+        } catch (GoogleApiException e) {
             e.printStackTrace();
         }
     }
