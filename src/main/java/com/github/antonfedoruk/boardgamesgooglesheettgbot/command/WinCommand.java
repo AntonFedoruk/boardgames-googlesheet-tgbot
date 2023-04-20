@@ -47,7 +47,7 @@ public class WinCommand implements Command {
     public void execute(Update update) {
         String commandFromUser = getMessage(update);
         if (commandFromUser.equalsIgnoreCase(WIN.getCommandName())) {
-            log.error(commandFromUser + " was send without parameters, so instruction message should be sent.");
+            log.trace(commandFromUser + " was send without parameters, so instruction message should be sent.");
             sendBotMessageService.sendMessage(getChatId(update), HOW_TO_USE_MESSAGE);
             return;
         }

@@ -1,4 +1,11 @@
 ## Release Notes
+
+### 0.8.0-SNAPSHOT
+*   restricted access to certain bot commands for non-privileged users.
+    * added @AdminCommand annotations(commands with such annotation can be used only by admins);
+    * added /promote and /demote admin's command;
+    * TelegramUser entity has been extended with hasGoogleAccess field.
+
 ### 0.7.0-SNAPSHOT
 *   added Logging to the project:
     * added logging at all stages of the project;

@@ -28,10 +28,18 @@ public interface TelegramUserService {
     /**
      * Find {@link TelegramUser} by chatId.
      *
-     * @param chatId provided by Chat ID
+     * @param userId provided by Chat ID
      * @return {@link TelegramUser} with provided chat ID or null otherwise.
      */
     Optional<TelegramUser> findByUserId(Long userId);
+
+    /**
+     * Find {@link TelegramUser} by userName.
+     *
+     * @param userName provided by Chat ID
+     * @return {@link TelegramUser} with provided chat ID or null otherwise.
+     */
+    Optional<TelegramUser> findByUserName(String userName);
 
     /**
      * Retrieve all inactive {@link TelegramUser}
@@ -39,4 +47,18 @@ public interface TelegramUserService {
      * @return the collection of the inactive {@link TelegramUser} objects.
      */
     List<TelegramUser> findAllInActiveUsers();
+
+    /**
+     * Retrieve all {@link TelegramUser} without granted access to Goggle Sheets.
+     *
+     * @return the collection of {@link TelegramUser} without access to Goggle Sheets.
+     */
+    List<TelegramUser> findAllUsersWithoutAccessToGoogleSheets();
+
+    /**
+     * Retrieve all {@link TelegramUser} with granted access to Goggle Sheets.
+     *
+     * @return the collection of {@link TelegramUser} with access to Goggle Sheets.
+     */
+    List<TelegramUser> findAllUsersWithAccessToGoogleSheets();
 }

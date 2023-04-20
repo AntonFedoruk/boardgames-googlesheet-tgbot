@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import java.util.List;
+
 import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.CommandName.NO;
 import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.CommandUtils.getUserName;
 
@@ -28,10 +30,11 @@ public class BoardGamesGoogleSheetTelegramBot extends TelegramLongPollingBot {
                                             @Value("${bot.token}") String token,
                                             @Value("${bot.username}") String username,
                                             @Value("${google.user.identify.key}") String userIdentifyKey,
-                                            GOauthController gOauthController) {
+                                            GOauthController gOauthController,
+                                            @Value("#{'${bot.admins}'.split(',')}") List<String> admins) {
         super(token);
         this.username = username;
-        this.commandContainer = new CommandContainer(new SendBotMessageServiceImpl(this), telegramUserService, googleApiService, userIdentifyKey, gOauthController);
+        this.commandContainer = new CommandContainer(new SendBotMessageServiceImpl(this), telegramUserService, googleApiService, userIdentifyKey, gOauthController, admins);
     }
 
     @Override
@@ -39,14 +42,15 @@ public class BoardGamesGoogleSheetTelegramBot extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String message = update.getMessage().getText().trim();
 
-            MDC.put("user", getUserName(update));
+            String userName = getUserName(update);
+            MDC.put("user", userName);
             MDC.put("message", message);
 
             if (message.startsWith(COMMAND_PREFIX)) {
                 String commandIdentifier = message.split(" ")[0].toLowerCase().split("@")[0];
-                commandContainer.retrieveCommandWrapCommandWithLoggingDecorator(commandIdentifier).execute(update);
+                commandContainer.retrieveCommandWrapCommandWithLoggingDecorator(commandIdentifier, userName).execute(update);
             } else {
-                commandContainer.retrieveCommandWrapCommandWithLoggingDecorator(NO.getCommandName()).execute(update);
+                commandContainer.retrieveCommandWrapCommandWithLoggingDecorator(NO.getCommandName(), userName).execute(update);
             }
 
             MDC.remove("user");
