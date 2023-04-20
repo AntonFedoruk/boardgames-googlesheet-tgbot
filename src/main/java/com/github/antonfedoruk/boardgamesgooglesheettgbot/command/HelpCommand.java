@@ -23,10 +23,9 @@ public class HelpCommand implements Command {
                     + "<i>Загальні:</i>\n"
                     + "%s - розпочати роботу зі мною;\n"
                     + "%s - призупинити роботу зі мною;\n"
-                    + "%s - відобразити активних учасників бота;\n"
                     + "%s - дізнатись що я можу.\n",
             GAMES.getCommandName(), WINNERS.getCommandName(), UPDATE_LOCATION.getCommandName(), WIN.getCommandName(),
-            START.getCommandName(), STOP.getCommandName(), STAT.getCommandName(), HELP.getCommandName());
+            START.getCommandName(), STOP.getCommandName(), HELP.getCommandName());
 
     public HelpCommand(SendBotMessageService sendBotMessageService) {
         this.sendBotMessageService = sendBotMessageService;
