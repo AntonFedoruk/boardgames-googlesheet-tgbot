@@ -53,4 +53,14 @@ class TelegramUserRepositoryIT {
         Assertions.assertTrue(saved.isPresent());
         Assertions.assertEquals(telegramUser, saved.get());
     }
+
+    @Sql(scripts = {"/sql/clearDbs.sql", "/sql/addUsers.sql"})
+    @Test
+    @DisplayName("Should properly find all users which have access to Google Sheets")
+    void shouldProperlyFindAllUsersWhichHaveAccessToGoogleSheets() {
+        // when
+        List<TelegramUser> allUsersWithAccessToGoogleSheets = telegramUserRepository.findAllByHasGoogleAccessTrue();
+        // then
+        Assertions.assertEquals(2, allUsersWithAccessToGoogleSheets.size());
+    }
 }

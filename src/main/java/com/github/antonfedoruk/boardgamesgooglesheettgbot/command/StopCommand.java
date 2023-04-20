@@ -28,6 +28,7 @@ public class StopCommand implements Command {
         sendBotMessageService.sendMessage(getChatId(update), STOP_MESSAGE);
         telegramUserService.findByUserId(getUserId(update)).ifPresent(telegramUser -> {
             telegramUser.setActive(false);
+            telegramUser.setHasGoogleAccess(false);
             telegramUserService.save(telegramUser);
         });
     }

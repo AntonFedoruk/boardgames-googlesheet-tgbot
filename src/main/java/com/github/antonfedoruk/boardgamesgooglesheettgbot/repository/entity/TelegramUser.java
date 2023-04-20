@@ -26,4 +26,7 @@ public class TelegramUser {
 
     @Column(name = "active")
     boolean active;
+
+    @Column(name = "has_google_access")
+    boolean hasGoogleAccess;
 }

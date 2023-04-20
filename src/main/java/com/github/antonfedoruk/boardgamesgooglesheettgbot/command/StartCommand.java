@@ -8,8 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.CommandName.HELP;
-import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.CommandUtils.getChatId;
-import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.CommandUtils.getUserName;
+import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.CommandUtils.*;
 
 /**
  * Start {@link Command}.
@@ -21,7 +20,8 @@ public class StartCommand implements Command {
 
     public static final String START_MESSAGE = "Привіт, скажи 300)) Запишу тебе в свій список, побачимо що з цього вийде.\n" +
             "Я тут для того, щоб допомогти зібратись на настолку та вести перелік ігор що в нас є і веду статистику по перемогам.\n" +
-            "Скористайся командою " + HELP.getCommandName()  + " щоб дізнатись як можна зі мною взаємодіяти.";
+            "Скористайся командою " + HELP.getCommandName() + " щоб дізнатись як можна зі мною взаємодіяти.";
+
     public StartCommand(SendBotMessageService sendBotMessageService, TelegramUserService telegramUserService) {
         this.sendBotMessageService = sendBotMessageService;
         this.telegramUserService = telegramUserService;
@@ -29,7 +29,7 @@ public class StartCommand implements Command {
 
     @Override
     public void execute(Update update) {
-        Long userId = CommandUtils.getUserId(update);
+        Long userId = getUserId(update);
         telegramUserService.findByUserId(userId).ifPresentOrElse(
                 user -> {
                     user.setActive(true);
@@ -40,6 +40,7 @@ public class StartCommand implements Command {
                     telegramUser.setActive(true);
                     telegramUser.setUserId(userId);
                     telegramUser.setUserName(getUserName(update));
+                    telegramUser.setHasGoogleAccess(false);
                     telegramUserService.save(telegramUser);
                 });
         sendBotMessageService.sendMessage(getChatId(update), START_MESSAGE);

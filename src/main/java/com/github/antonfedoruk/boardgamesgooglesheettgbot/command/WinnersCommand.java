@@ -55,6 +55,7 @@ public class WinnersCommand implements Command {
     public void execute(Update update) {
         String commandFromUser = getMessage(update);
         if (commandFromUser.equalsIgnoreCase(WINNERS.getCommandName())) {
+            log.trace(commandFromUser + " was send without parameters, so instruction message should be sent.");
             sendBotMessageService.sendMessage(getChatId(update), HOW_TO_USE_MESSAGE);
             return;
         }
