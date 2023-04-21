@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 0.8.1-SNAPSHOT
+*   improved Readme.md file.
+
 ### 0.8.0-SNAPSHOT
 *   restricted access to certain bot commands for non-privileged users.
     * added @AdminCommand annotations(commands with such annotation can be used only by admins);
