@@ -26,15 +26,16 @@
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
-        <li><a href="#prerequisites">Required Software</a></li>
-        <li><a href="#installation">Running</a></li>
+        <li><a href="#required-software">Required Software</a></li>
+        <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
     <li><a href="#release-notes">Release Notes</a></li>
-    <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#code-of-conduct">Code of Conduct</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
@@ -199,9 +200,3 @@ Please, follow [Code of Conduct](CODE_OF_CONDUCT.md) page.
 [Telegram-url]: https://core.telegram.org/bots/api
 [Google-Sheets]: https://img.shields.io/badge/Google_Sheets-API-34A853?style=for-the-badge&logo=googlesheets&logoColor=white
 [Google-Sheets-url]: https://developers.google.com/sheets/api/quickstart/java
-
-[link text](#readme-top)
-
-<a href="#about-the-project">About The Project</a>
-
-<a href="#readme-top">readme top</a>
