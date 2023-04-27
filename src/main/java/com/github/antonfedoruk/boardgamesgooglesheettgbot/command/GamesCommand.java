@@ -2,7 +2,8 @@ package com.github.antonfedoruk.boardgamesgooglesheettgbot.command;
 
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.command.annotation.GoogleAPICommand;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.Game;
-import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiException;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiIOException;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiOnExecuteException;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.GoogleApiService;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.SendBotMessageService;
 import org.slf4j.Logger;
@@ -19,6 +20,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.CommandUtils.getChatId;
+import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.UpdateLocationCommand.GENERAL_SECURITY_EXCEPTION_MESSAGE;
+import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.UpdateLocationCommand.IO_EXCEPTION_MESSAGE;
 
 /**
  * Games {@link Command}.
@@ -51,11 +54,15 @@ public class GamesCommand implements Command {
             try {
                 gamesFromGoogleSheet = googleApiService.getGamesFromGoogleSheet();
                 log.trace("Games have been obtained from Google Sheets.");
-            } catch (GoogleApiException e) {
-                log.error(e.getMessage(), e);
-                sendBotMessageService.sendMessage(getChatId(update), SHEETS_SERVICE_EXCEPTION_MESSAGE);
-                return;
+            } catch (GoogleApiOnExecuteException e) {
+                log.error(e.getMessage());
+                sendBotMessageService.sendMessage(getChatId(update), GENERAL_SECURITY_EXCEPTION_MESSAGE);
+            } catch (GoogleApiIOException e) {
+                log.error(e.getMessage());
+                sendBotMessageService.sendMessage(getChatId(update), IO_EXCEPTION_MESSAGE);
             }
+//                sendBotMessageService.sendMessage(getChatId(update), SHEETS_SERVICE_EXCEPTION_MESSAGE);
+
 
             if (gamesFromGoogleSheet.isEmpty()) {
                 log.trace("Ops, looks like there is no Games in Google Sheet.");

@@ -24,7 +24,7 @@ class GoogleSheetClientIT {
     @Test
     @EnabledIf("isFileExists")
     @DisplayName("Should retrieve all games from Google Sheet")
-    void shouldRetrieveAllGamesFromGoogleSheet() throws GoogleApiException {
+    void shouldRetrieveAllGamesFromGoogleSheet() throws GoogleApiIOException, GoogleApiOnExecuteException {
         // when
         Map<String, Game> gamesFromGoogleSheet = googleSheetClient.getGamesFromGoogleSheet();
         // then
@@ -34,7 +34,7 @@ class GoogleSheetClientIT {
     @Test
     @EnabledIf("isFileExists")
     @DisplayName("Should update games location on Google Sheet")
-    void shouldUpdateGamesLocationOnGoogleSheet() throws GoogleApiException {
+    void shouldUpdateGamesLocationOnGoogleSheet() throws GoogleApiIOException, GoogleApiOnExecuteException {
         // given
         Map<String, Game> gamesFromGoogleSheet = googleSheetClient.getGamesFromGoogleSheet();
         String gamesId = "56";

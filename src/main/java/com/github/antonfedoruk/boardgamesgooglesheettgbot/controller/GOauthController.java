@@ -1,7 +1,8 @@
 package com.github.antonfedoruk.boardgamesgooglesheettgbot.controller;
 
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.command.NoCommand;
-import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiException;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiIOException;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiOnExecuteException;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.util.GoogleAuthorizeUtil;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.GoogleApiService;
 import com.google.api.client.auth.oauth2.Credential;
@@ -118,8 +119,16 @@ public class GOauthController {
 //            } else {
 //                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error occurred while retrieving the game list", e);
 //            }
-        } catch (GoogleApiException e) {
+        } catch (GoogleApiOnExecuteException e) {
+            if (e.getStatusCode() == 403) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access to the resource is forbidden", e);
+            } else {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error occurred while retrieving the game list", e);
+            }
+        } catch (GoogleApiIOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error occurred while retrieving the game list", e);
+        } catch (NullPointerException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error occurred cuz user is not authorize yet", e);
         }
         log.trace("Redirect on: 'games.html'.");
         return "games";

@@ -5,6 +5,7 @@ import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.WinRecord;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.util.GoogleAuthorizeUtil;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.util.SheetsServiceUtil;
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.*;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,7 @@ public class GoogleSheetClientImpl implements GoogleSheetClient {
         USER_IDENTIFY_KEY = userIdentifyKey;
     }
 
-    public void initSheetsService() throws GoogleApiException {
+    public void initSheetsService() throws GoogleApiIOException {
         if (sheetsService == null) {
             log.trace("Initialization of Sheets service for user:'" + USER_IDENTIFY_KEY + "'.");
             try {
@@ -47,13 +48,14 @@ public class GoogleSheetClientImpl implements GoogleSheetClient {
                     log.trace("As credential.refreshToken() IS NULL ---> sheetService CAN'T be initialized.");
                 }
             } catch (IOException e) {
-                log.error("Exception occurs trying to load credential of user(" + USER_IDENTIFY_KEY + ") -> because 'credential' is null. Signing needed.", e);
-                throw new GoogleApiException("Failed to load credential of user(" + USER_IDENTIFY_KEY + ")", e);
+                String errorMsg = "Exception occurs trying to load credential of user(" + USER_IDENTIFY_KEY + ") -> because 'credential' is null. Signing needed.";
+                log.error(errorMsg, e);
+                throw new GoogleApiIOException(errorMsg, e);
             }
         }
     }
 
-    public boolean createNewSheetTab(String newTabName) throws GoogleApiException {
+    public boolean createNewSheetTab(String newTabName) throws GoogleApiIOException, GoogleApiOnExecuteException {
         log.trace("Method createNewSheetTab() invoked for table: '" + newTabName + "'...");
         initSheetsService();
 
@@ -70,9 +72,14 @@ public class GoogleSheetClientImpl implements GoogleSheetClient {
             try {
                 sheetsService.spreadsheets().batchUpdate(SPREADSHEET_ID, requestBody).execute();
                 log.trace("Added new table '" + newTabName + "' to the spreadsheet(" + SPREADSHEET_ID + ").");
+            } catch (HttpResponseException exception) {
+                String errorMsg = "Error occurs trying to sheetsService.spreadsheets()......execute() part in createNewSheetTab() method.";
+                log.error(errorMsg);
+                throw new GoogleApiOnExecuteException(errorMsg, exception);
             } catch (IOException e) {
-                log.error("Exception occurs trying to add new table '" + newTabName + "' to the spreadsheet(" + SPREADSHEET_ID + ").", e);
-                throw new GoogleApiException("Failed to add a new table '" + newTabName + "'to the  Google spreadsheet(" + SPREADSHEET_ID + ").", e);
+                String errorMsg = "Exception occurs trying to add new table '" + newTabName + "' to the spreadsheet(" + SPREADSHEET_ID + ").";
+                log.error(errorMsg, e);
+                throw new GoogleApiIOException(errorMsg, e);
             }
 
             addColumnNamesForEmptyWinnersTable(newTabName);
@@ -87,14 +94,19 @@ public class GoogleSheetClientImpl implements GoogleSheetClient {
         return true;
     }
 
-    private boolean isSuchTableExist(String tableName) throws GoogleApiException {
+    private boolean isSuchTableExist(String tableName) throws GoogleApiOnExecuteException, GoogleApiIOException {
         log.trace("Method isSuchTableExist() invoked for table: '" + tableName + "'...");
         Spreadsheet spreadsheet;
         try {
             spreadsheet = sheetsService.spreadsheets().get(SPREADSHEET_ID).execute();
+        } catch (HttpResponseException exception) {
+            String errorMsg = "Error occurs trying to sheetsService.spreadsheets()......execute() part in isSuchTableExist() method.";
+            log.error(errorMsg);
+            throw new GoogleApiOnExecuteException(errorMsg, exception);
         } catch (IOException e) {
-            log.error("Exception occurs getting spreadsheets with id:'" + SPREADSHEET_ID + "'.", e);
-            throw new GoogleApiException("Failed to load Google spreadsheets with id:'" + SPREADSHEET_ID + "'.", e);
+            String errorMsg = "Exception occurs getting spreadsheets with id:'" + SPREADSHEET_ID + "'.";
+            log.error(errorMsg, e);
+            throw new GoogleApiIOException(errorMsg, e);
         }
         List<Sheet> sheets = spreadsheet.getSheets();
         for (Sheet sheet : sheets) {
@@ -107,7 +119,7 @@ public class GoogleSheetClientImpl implements GoogleSheetClient {
         return false;
     }
 
-    private void addColumnNamesForEmptyWinnersTable(String tableName) throws GoogleApiException {
+    private void addColumnNamesForEmptyWinnersTable(String tableName) throws GoogleApiOnExecuteException, GoogleApiIOException {
         log.trace("Method addColumnNamesForEmptyWinnersTable() invoked for table: '" + tableName + "'...");
         ValueRange columnNames = new ValueRange()
                 .setValues(Collections.singletonList(Arrays.asList("Дата", "Переможець", "Переможні очки", "Інші гравці", "Примітки")));
@@ -119,14 +131,19 @@ public class GoogleSheetClientImpl implements GoogleSheetClient {
                     .setIncludeValuesInResponse(true)
                     .execute();
             log.trace("...row with column names was added to the table '" + tableName + "'.");
+        } catch (HttpResponseException exception) {
+            String errorMsg = "Error occurs trying to sheetsService.spreadsheets()......execute() part in addColumnNamesForEmptyWinnersTable() method.";
+            log.error(errorMsg);
+            throw new GoogleApiOnExecuteException(errorMsg, exception);
         } catch (IOException e) {
-            log.error("Exception occurs trying to append a row of column names for table:'" + tableName + "'.", e);
-            throw new GoogleApiException("Failed to append a row of column names for table:'" + tableName + "'.", e);
+            String errorMsg = "Exception occurs trying to append a row of column names for table:'" + tableName + "'.";
+            log.error(errorMsg, e);
+            throw new GoogleApiIOException(errorMsg, e);
         }
     }
 
     @Override
-    public boolean addWinRecordToTheSheet(String tableName, WinRecord gameResult) throws GoogleApiException {
+    public boolean addWinRecordToTheSheet(String tableName, WinRecord gameResult) throws GoogleApiOnExecuteException, GoogleApiIOException {
         log.trace("Method addWinRecordToTheSheet() invoked for table '" + tableName + "' with win record: " + gameResult + "...");
         initSheetsService();
         boolean isWinRecordAdded = false;
@@ -144,15 +161,20 @@ public class GoogleSheetClientImpl implements GoogleSheetClient {
                 log.trace("...row '" + appendWinRecord.getUpdates().getUpdatedRows() + "' has been appended to the table '" + tableName + "'.");
                 isWinRecordAdded = true;
             }
+        } catch (HttpResponseException exception) {
+            String errorMsg = "Error occurs trying to sheetsService.spreadsheets()......execute() part in addWinRecordToTheSheet() method.";
+            log.error(errorMsg);
+            throw new GoogleApiOnExecuteException(errorMsg, exception);
         } catch (IOException e) {
-            log.error("Exception occurs trying to append a new win record('" + winRecord + "') to the table:'" + tableName + "'.", e);
-            throw new GoogleApiException("Failed to append a new win record('" + winRecord + "') to the table:'" + tableName + "'.", e);
+            String errorMsg = "Exception occurs trying to append a new win record('" + winRecord + "') to the table:'" + tableName + "'.";
+            log.error(errorMsg, e);
+            throw new GoogleApiIOException(errorMsg, e);
         }
         return isWinRecordAdded;
     }
 
     @Override
-    public String updateGameLocation(String gamesId, String newLocation) throws GoogleApiException {
+    public String updateGameLocation(String gamesId, String newLocation) throws GoogleApiIOException, GoogleApiOnExecuteException {
         log.trace("Method updateGameLocation() invoked for game #:'" + gamesId + "' with new location: '" + newLocation + "'...");
         initSheetsService();
 
@@ -166,9 +188,14 @@ public class GoogleSheetClientImpl implements GoogleSheetClient {
                     .setValueInputOption("RAW")
                     .setIncludeValuesInResponse(true)
                     .execute();
+        } catch (HttpResponseException exception) {
+            String errorMsg = "Error occurs trying to sheetsService.spreadsheets()......execute() part in updateGameLocation() method.";
+            log.error(errorMsg);
+            throw new GoogleApiOnExecuteException(errorMsg, exception);
         } catch (IOException e) {
-            log.error("Exception occurs trying to update game's(#:" + gamesId + ") location to '" + newLocation + "'.", e);
-            throw new GoogleApiException("Failed to update game's(#:" + gamesId + ") location to '" + newLocation + "'.", e);
+            String errorMsg = "Exception occurs trying to update game's(#:" + gamesId + ") location to '" + newLocation + "'.";
+            log.error(errorMsg, e);
+            throw new GoogleApiIOException(errorMsg, e);
         }
 
         String updatedLocation = valuesResponse.getUpdatedData().getValues().get(0).get(0).toString();
@@ -177,7 +204,7 @@ public class GoogleSheetClientImpl implements GoogleSheetClient {
     }
 
     @Override
-    public Map<String, Game> getGamesFromGoogleSheet() throws GoogleApiException {
+    public Map<String, Game> getGamesFromGoogleSheet() throws GoogleApiIOException, GoogleApiOnExecuteException {
         log.trace("Method getGamesFromGoogleSheet() invoked...");
         initSheetsService();
 
@@ -201,7 +228,8 @@ public class GoogleSheetClientImpl implements GoogleSheetClient {
     }
 
     @Override
-    public List<WinRecord> getWinRecordsForGameFromGoogleSheet(String game) throws GoogleApiException {
+    public List<WinRecord> getWinRecordsForGameFromGoogleSheet(String game) throws
+            GoogleApiIOException, GoogleApiOnExecuteException {
         log.trace("Method getWinRecordsForGameFromGoogleSheet() invoked for game: '" + game + "'...");
         initSheetsService();
 
@@ -228,14 +256,20 @@ public class GoogleSheetClientImpl implements GoogleSheetClient {
         return winRecords;
     }
 
-    private ValueRange getValueRangeFromSpreadsheetOrThrowGoogleApiException(String range) throws GoogleApiException {
+    private ValueRange getValueRangeFromSpreadsheetOrThrowGoogleApiException(String range) throws
+            GoogleApiOnExecuteException, GoogleApiIOException {
         try {
             return sheetsService.spreadsheets().values()
                     .get(SPREADSHEET_ID, range)
                     .execute();
+        } catch (HttpResponseException exception) {
+            String errorMsg = "Error occurs trying to sheetsService.spreadsheets()......execute() part in getValueRangeFromSpreadsheetOrThrowGoogleApiException() method.";
+            log.error(errorMsg);
+            throw new GoogleApiOnExecuteException(errorMsg, exception);
         } catch (IOException e) {
-            log.error("Exception occurs trying to get data from Google Sheet spreadsheet's '" + SPREADSHEET_ID + "' and '" + range + "'range.", e);
-            throw new GoogleApiException("Failed to get data from Google Sheet spreadsheet's '" + SPREADSHEET_ID + "' and '" + range + "'range.", e);
+            String errorMsg = "Exception occurs trying to get data from Google Sheet spreadsheet's '" + SPREADSHEET_ID + "' and '" + range + "'range.";
+            log.error(errorMsg, e);
+            throw new GoogleApiIOException(errorMsg, e);
         }
     }
 }

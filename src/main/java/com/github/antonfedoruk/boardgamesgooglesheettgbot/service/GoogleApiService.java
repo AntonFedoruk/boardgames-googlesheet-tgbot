@@ -2,7 +2,8 @@ package com.github.antonfedoruk.boardgamesgooglesheettgbot.service;
 
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.Game;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.WinRecord;
-import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiException;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiIOException;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiOnExecuteException;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleSheetClient;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -25,35 +26,35 @@ public class GoogleApiService {
         this.googleSheetClient = googleSheetClient;
     }
 
-    public Map<String, Game> getGamesFromGoogleSheet() throws GoogleApiException {
+    public Map<String, Game> getGamesFromGoogleSheet() throws GoogleApiIOException, GoogleApiOnExecuteException {
         log.trace("GoogleApiService's getGamesFromGoogleSheet() invoked...");
         Map<String, Game> gamesFromGoogleSheet = googleSheetClient.getGamesFromGoogleSheet();
         log.trace("...GoogleApiService's getGamesFromGoogleSheet() completed.");
         return gamesFromGoogleSheet;
     }
 
-    public String updateGameLocation(String id, String newLocation) throws GoogleApiException {
+    public String updateGameLocation(String id, String newLocation) throws GoogleApiIOException, GoogleApiOnExecuteException {
         log.trace("GoogleApiService's updateGameLocation() invoked...");
         String updatedLocation = googleSheetClient.updateGameLocation(id, newLocation);
         log.trace("...GoogleApiService's updateGameLocation() completed.");
         return updatedLocation;
     }
 
-    public boolean createNewSheetTab(String newTabName) throws GoogleApiException {
+    public boolean createNewSheetTab(String newTabName) throws GoogleApiIOException, GoogleApiOnExecuteException {
         log.trace("GoogleApiService's createNewSheetTab() invoked...");
         boolean isNewTabCreated = googleSheetClient.createNewSheetTab(newTabName);
         log.trace("...GoogleApiService's createNewSheetTab() completed.");
         return isNewTabCreated;
     }
 
-    public boolean addWinRecordToTheSheet(String tableName, WinRecord gameResult) throws GoogleApiException {
+    public boolean addWinRecordToTheSheet(String tableName, WinRecord gameResult) throws GoogleApiIOException, GoogleApiOnExecuteException {
         log.trace("GoogleApiService's addWinRecordToTheSheet() invoked...");
         boolean isWinRecordAdded = googleSheetClient.addWinRecordToTheSheet(tableName, gameResult);
         log.trace("...GoogleApiService's addWinRecordToTheSheet() completed.");
         return isWinRecordAdded;
     }
 
-    public List<WinRecord> getWinRecordsForGameFromGoogleSheet(String game) throws GoogleApiException {
+    public List<WinRecord> getWinRecordsForGameFromGoogleSheet(String game) throws GoogleApiIOException, GoogleApiOnExecuteException {
         log.trace("GoogleApiService's getWinRecordsForGameFromGoogleSheet() invoked...");
         List<WinRecord> winRecordsForGameFromGoogleSheet = googleSheetClient.getWinRecordsForGameFromGoogleSheet(game);
         log.trace("...GoogleApiService's getWinRecordsForGameFromGoogleSheet() completed.");

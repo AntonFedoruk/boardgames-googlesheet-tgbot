@@ -1,6 +1,6 @@
 package com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.util;
 
-import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiException;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiIOException;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
@@ -18,15 +18,16 @@ import java.io.IOException;
 public class SheetsServiceUtil {
     private static final String APPLICATION_NAME = "Board Games Telegram Bot";
 
-    public static Sheets getSheetsService(String clientId) throws GoogleApiException {
+    public static Sheets getSheetsService(String clientId) throws GoogleApiIOException {
         log.trace("Method getSheetsService() invoked...");
         final NetHttpTransport HTTP_TRANSPORT = new NetHttpTransport();
         Credential credential;
         try {
             credential = GoogleAuthorizeUtil.getGoogleAuthorizationCodeFlow().loadCredential(clientId);
         } catch (IOException e) {
-            log.error("Exception occurs trying to load credential of user(" + clientId + ") -> because 'credential' is null. Signing needed.", e);
-            throw new GoogleApiException("Failed to load credential of user(" + clientId + ")", e);
+            String errorMsg = "Exception occurs trying to load credential of user(" + clientId + ") -> because 'credential' is null. Signing needed.";
+            log.error(errorMsg, e);
+            throw new GoogleApiIOException(errorMsg, e);
         }
         Sheets sheets = new Sheets.Builder(HTTP_TRANSPORT, GsonFactory.getDefaultInstance(), credential).setApplicationName(APPLICATION_NAME).build();
         log.trace("... getSheetsService() completed, sheets service obtained.");

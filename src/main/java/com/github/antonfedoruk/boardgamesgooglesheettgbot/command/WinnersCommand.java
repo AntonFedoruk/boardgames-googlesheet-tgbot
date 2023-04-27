@@ -3,7 +3,8 @@ package com.github.antonfedoruk.boardgamesgooglesheettgbot.command;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.command.annotation.GoogleAPICommand;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.Game;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.WinRecord;
-import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiException;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiIOException;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiOnExecuteException;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.GoogleApiService;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.SendBotMessageService;
 import org.slf4j.Logger;
@@ -16,7 +17,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +25,8 @@ import java.util.stream.Collectors;
 import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.CommandName.WINNERS;
 import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.CommandUtils.getChatId;
 import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.CommandUtils.getMessage;
-import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.UpdateLocationCommand.IO_OR_GENERAL_SECURITY_EXCEPTION_MESSAGE;
+import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.UpdateLocationCommand.GENERAL_SECURITY_EXCEPTION_MESSAGE;
+import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.UpdateLocationCommand.IO_EXCEPTION_MESSAGE;
 
 /**
  * Winner {@link Command}.
@@ -84,9 +85,12 @@ public class WinnersCommand implements Command {
                     .collect(Collectors.joining("\n"));
             log.trace("Due to " + e.getMessage() + " error user should obtain gameList as 'message'.");
             sendBotMessageService.sendMessage(getChatId(update), message + winRecords);
-        } catch (GoogleApiException e) {
-            log.error(e.getMessage(), e);
-            sendBotMessageService.sendMessage(getChatId(update), IO_OR_GENERAL_SECURITY_EXCEPTION_MESSAGE);
+        } catch (GoogleApiIOException e) {
+            log.error(e.getMessage());
+            sendBotMessageService.sendMessage(getChatId(update), IO_EXCEPTION_MESSAGE);
+        } catch (GoogleApiOnExecuteException e) {
+            log.error(e.getMessage());
+            sendBotMessageService.sendMessage(getChatId(update), GENERAL_SECURITY_EXCEPTION_MESSAGE);
         }
     }
 

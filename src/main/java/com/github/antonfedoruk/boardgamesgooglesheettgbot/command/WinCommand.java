@@ -3,15 +3,14 @@ package com.github.antonfedoruk.boardgamesgooglesheettgbot.command;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.command.annotation.GoogleAPICommand;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.Game;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.WinRecord;
-import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiException;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiIOException;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiOnExecuteException;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.GoogleApiService;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.SendBotMessageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Map;
@@ -19,7 +18,8 @@ import java.util.Map;
 import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.CommandName.WIN;
 import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.CommandUtils.getChatId;
 import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.CommandUtils.getMessage;
-import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.UpdateLocationCommand.IO_OR_GENERAL_SECURITY_EXCEPTION_MESSAGE;
+import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.UpdateLocationCommand.GENERAL_SECURITY_EXCEPTION_MESSAGE;
+import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.UpdateLocationCommand.IO_EXCEPTION_MESSAGE;
 
 /**
  * Win {@link Command}.
@@ -70,9 +70,12 @@ public class WinCommand implements Command {
             if (googleApiService.addWinRecordToTheSheet(gameName, gameResult)){
                 sendBotMessageService.sendMessage(getChatId(update), ADDED_RECORD_MESSAGE);
             }
-        } catch (GoogleApiException e) {
+        } catch (GoogleApiIOException e) {
             log.error(e.getMessage());
-            sendBotMessageService.sendMessage(getChatId(update), IO_OR_GENERAL_SECURITY_EXCEPTION_MESSAGE);
+            sendBotMessageService.sendMessage(getChatId(update), IO_EXCEPTION_MESSAGE);
+        } catch (GoogleApiOnExecuteException e) {
+            log.error(e.getMessage());
+            sendBotMessageService.sendMessage(getChatId(update), GENERAL_SECURITY_EXCEPTION_MESSAGE);
         }
     }
 

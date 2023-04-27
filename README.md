@@ -9,7 +9,7 @@
   </a>
 
 <h3 align="center">Board Games Google Sheets Telegram Bot</h3>
-<h4 align="center">[OurBoardGames](https://t.me/boardgames_googlesheet_bot)</h3>
+<a href="https://t.me/boardgames_googlesheet_bot">OurBoardGames</a>
 </div>
 
 

@@ -1,16 +1,14 @@
 package com.github.antonfedoruk.boardgamesgooglesheettgbot.command;
 
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.command.annotation.GoogleAPICommand;
-import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiException;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiIOException;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiOnExecuteException;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.GoogleApiService;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.SendBotMessageService;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
 import static com.github.antonfedoruk.boardgamesgooglesheettgbot.command.CommandName.UPDATE_LOCATION;
@@ -34,7 +32,8 @@ public class UpdateLocationCommand implements Command {
     public static final String OUT_OF_RANGE_GAME_ID_MESSAGE = "Сонечко, щось не так, в нас ще нема так багато ігор, перевір <i>#_гри</i> будь ласочка і спробуй ще раз.";
     public static final String TO_LONG_LOCATION_NAME_MESSAGE = "Йо йо, Толік, це ти? По людські ж попросив НЕ РОБИТЬ довгу назву 'локації' :(";
     public static final String LOCATION_CHANGED_MESSAGE = "Місцезнаходження гри <b>#%s</b> успішно оновлено до <i>%s</i>.";
-    public static final String IO_OR_GENERAL_SECURITY_EXCEPTION_MESSAGE = "Йо-йой, щось пішло не так, ГОВНОКОД детекшн!";
+    public static final String IO_EXCEPTION_MESSAGE = "Йо-йой, щось пішло не так, ГОВНОКОД детекшн(IO_EXCEPTION)!";
+    public static final String GENERAL_SECURITY_EXCEPTION_MESSAGE = "Йо-йой, щось пішло не так, ГОВНОКОД детекшн(GENERAL_SECURITY_EXCEPTION)!";
 
     public UpdateLocationCommand(SendBotMessageService sendBotMessageService, GoogleApiService googleApiService) {
         this.sendBotMessageService = sendBotMessageService;
@@ -64,25 +63,23 @@ public class UpdateLocationCommand implements Command {
                 sendBotMessageService.sendMessage(getChatId(update), OUT_OF_RANGE_GAME_ID_MESSAGE);
                 return;
             }
-        } catch (GoogleApiException e) {
-            log.error(e.getMessage());
-            sendBotMessageService.sendMessage(getChatId(update), IO_OR_GENERAL_SECURITY_EXCEPTION_MESSAGE);
-            return;
-        }
 
-        String gamesNewLocation = String.join(" ", Arrays.copyOfRange(commandByParts, 2, commandByParts.length));
 
-        if (gamesNewLocation.length() > 20) {
-            sendBotMessageService.sendMessage(getChatId(update), TO_LONG_LOCATION_NAME_MESSAGE);
-            return;
-        }
+            String gamesNewLocation = String.join(" ", Arrays.copyOfRange(commandByParts, 2, commandByParts.length));
 
-        try {
+            if (gamesNewLocation.length() > 20) {
+                sendBotMessageService.sendMessage(getChatId(update), TO_LONG_LOCATION_NAME_MESSAGE);
+                return;
+            }
+
             String storedLocation = googleApiService.updateGameLocation(gamesId, gamesNewLocation);
             sendBotMessageService.sendMessage(getChatId(update), String.format(LOCATION_CHANGED_MESSAGE, gamesId, storedLocation));
-        } catch (GoogleApiException e) {
+        } catch (GoogleApiOnExecuteException e) {
             log.error(e.getMessage());
-            sendBotMessageService.sendMessage(getChatId(update), IO_OR_GENERAL_SECURITY_EXCEPTION_MESSAGE);
+            sendBotMessageService.sendMessage(getChatId(update), GENERAL_SECURITY_EXCEPTION_MESSAGE);
+        } catch (GoogleApiIOException e) {
+            log.error(e.getMessage());
+            sendBotMessageService.sendMessage(getChatId(update), IO_EXCEPTION_MESSAGE);
         }
     }
 

@@ -2,7 +2,8 @@ package com.github.antonfedoruk.boardgamesgooglesheettgbot.command;
 
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.Game;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.WinRecord;
-import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiException;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiIOException;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiOnExecuteException;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.GoogleApiService;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.SendBotMessageService;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +43,7 @@ class WinnersCommandTest {
 
     @Test
     @DisplayName("Should send proper message when there is no necessary parameters.")
-    void shouldSendProperMessageWhenThereIsNoNecessaryParameters() throws GoogleApiException {
+    void shouldSendProperMessageWhenThereIsNoNecessaryParameters(){
         // given
         Long chatId = 1L;
         Update  update = prepearedUpdate(chatId, "");
@@ -55,7 +56,7 @@ class WinnersCommandTest {
 
     @Test
     @DisplayName("Should send proper message when there is no win records.")
-    void shouldSendProperMessageWhenThereIsNoWinRecords() throws GoogleApiException {
+    void shouldSendProperMessageWhenThereIsNoWinRecords() throws GoogleApiIOException, GoogleApiOnExecuteException {
         // given
         String gamesId = "1";
         String gameName = "chess";
@@ -78,7 +79,7 @@ class WinnersCommandTest {
 
     @Test
     @DisplayName("Should send proper message when win records exist")
-    void shouldSendProperMessageWhenWinRecordsExist() throws GoogleApiException {
+    void shouldSendProperMessageWhenWinRecordsExist() throws GoogleApiIOException, GoogleApiOnExecuteException {
         // given
         String gamesId = "1";
         String gameName = "chess";
@@ -101,39 +102,6 @@ class WinnersCommandTest {
         Mockito.verify(sendBotMessageService).sendMessage(chatId, WIN_RECORDS_FOUND_MESSAGE);
         Mockito.verify(sendBotMessageService).sendPhoto(any(), any(File.class));
     }
-
-//    @Test
-//    @DisplayName("Should send proper message when AWTError occurs")
-//    void shouldSendProperMessageWhenAWTErrorOccurs() throws GoogleApiException {
-//        // given
-//        String gamesId = "1";
-//        String gameName = "chess";
-//
-//        Map<String, Game> games = new HashMap<>();
-//        Game game = new Game("1", gameName, "2", "Nick", "In the park");
-//        games.put("1", game);
-//        Mockito.when(googleApiService.getGamesFromGoogleSheet()).thenReturn(games);
-//
-//        List<WinRecord> winRecordsForGameFromGoogleSheet = new ArrayList<>();
-//        WinRecord winRecord = new WinRecord(LocalDate.of(2023, 4, 20), "Mazar", "1:0", "Mike", "Nice gameplay");
-//        winRecordsForGameFromGoogleSheet.add(winRecord);
-//        Mockito.when(googleApiService.getWinRecordsForGameFromGoogleSheet(gameName)).thenReturn(winRecordsForGameFromGoogleSheet).thenThrow(new AWTError("X11 error"));
-////        Mockito.when(googleApiService.getWinRecordsForGameFromGoogleSheet(gameName)).thenThrow(new AWTError("X11 error"));
-//
-//        Long chatId = 1L;
-//        Update  update = prepearedUpdate(chatId, gamesId);
-//
-//        String message = "<b>Записи перемог</b>: \n";
-//        String winRecords = winRecordsForGameFromGoogleSheet.stream().sorted()
-//                .map(record -> "<b>" + winRecord.getWinner() + "</b> (<i>" + winRecord.getScore() + "</i> | <u> " + winRecord.getDate() + "</u>)")
-//                .collect(Collectors.joining("\n"));
-//
-//        // when
-//        winnersCommand.execute(update);
-//        // then
-//        Mockito.verify(sendBotMessageService).sendMessage(chatId, WIN_RECORDS_FOUND_MESSAGE);
-//        Mockito.verify(sendBotMessageService).sendMessage(chatId, message + winRecords);
-//    }
 
     private Update prepearedUpdate(Long chatId, String gameId) {
         Update update = new Update();
