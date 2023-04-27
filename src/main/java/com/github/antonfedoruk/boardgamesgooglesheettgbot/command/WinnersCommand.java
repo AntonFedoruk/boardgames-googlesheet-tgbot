@@ -48,7 +48,9 @@ public class WinnersCommand implements Command {
     public WinnersCommand(SendBotMessageService sendBotMessageService, GoogleApiService googleApiService) {
         this.sendBotMessageService = sendBotMessageService;
         this.googleApiService = googleApiService;
-        this.PHOTO_PATHNAME = googleApiService.getGetPhotoPathname();
+        //this.PHOTO_PATHNAME = googleApiService.getGetPhotoPathname();//        this.PHOTO_PATHNAME = googleApiService.getPHOTO_PATHNAME(); //bugfix: can't find pictures. need to check again later + at prepareAndSendPicturesOfGames() also
+        String projectDir = System.getProperty("user.dir");
+        PHOTO_PATHNAME = projectDir + "/src/main/resources/created-pictures/";
     }
 
     @Override
@@ -63,16 +65,25 @@ public class WinnersCommand implements Command {
         String[] commandByParts = commandFromUser.split(" ");
         String gamesId = commandByParts[1];
 
+        List<WinRecord> winRecordsForGameFromGoogleSheet = null;
         try {
             Map<String, Game> gamesFromGoogleSheet = googleApiService.getGamesFromGoogleSheet();
             String gameName = gamesFromGoogleSheet.get(gamesId).getName();
-            List<WinRecord> winRecordsForGameFromGoogleSheet = googleApiService.getWinRecordsForGameFromGoogleSheet(gameName);
-            if (winRecordsForGameFromGoogleSheet.isEmpty()){
+            winRecordsForGameFromGoogleSheet = googleApiService.getWinRecordsForGameFromGoogleSheet(gameName);
+            if (winRecordsForGameFromGoogleSheet.isEmpty()) {
                 sendBotMessageService.sendMessage(getChatId(update), String.format(NO_WIN_RECORDS_MESSAGE, gameName));
             } else {
                 sendBotMessageService.sendMessage(getChatId(update), WIN_RECORDS_FOUND_MESSAGE);
                 prepareAndSendPicturesOfWinRecords(update, winRecordsForGameFromGoogleSheet, gameName);
             }
+        } catch ( AWTError e) { //#Exception in thread ... java.awt.AWTError: Can't connect to X11 window server using ':0.0' as the value of the DISPLAY variable.
+            log.error("ERROR occurred!!!", e);
+            String message = "<b>Записи перемог</b>: \n";
+            String winRecords = winRecordsForGameFromGoogleSheet.stream().sorted()
+                    .map(winRecord -> "<b>" + winRecord.getWinner() + "</b> (<i>" + winRecord.getScore() + "</i> | <u> " + winRecord.getDate() + "</u>)")
+                    .collect(Collectors.joining("\n"));
+            log.trace("Due to " + e.getMessage() + " error user should obtain gameList as 'message'.");
+            sendBotMessageService.sendMessage(getChatId(update), message + winRecords);
         } catch (GoogleApiException e) {
             log.error(e.getMessage(), e);
             sendBotMessageService.sendMessage(getChatId(update), IO_OR_GENERAL_SECURITY_EXCEPTION_MESSAGE);
@@ -89,22 +100,22 @@ public class WinnersCommand implements Command {
         for (int i = 0; i < winRecordsForGameFromGoogleSheet.size(); i = i + defaultAmountOfRecordsOn1Photo) {
             String gameList = winRecordsForGameFromGoogleSheet.stream().sorted(Comparator.comparing(WinRecord::getDate).reversed()).skip(i).limit(defaultAmountOfRecordsOn1Photo)
                     .map(winRecord -> "<tr style='border-bottom: 1px solid #000'>" +
-                                          "<td style='text-align:center; border-bottom: 1px solid #000'>" + winRecord.getDate() + "</td>" +
-                                          "<td style='border-bottom: 1px solid #000'><b>" + winRecord.getWinner() + "</b></td>" +
-                                          "<td style='text-align:center; border-bottom: 1px solid #000'><i>" + winRecord.getScore() + "</i></td>" +
-                                          "<td style='border-bottom: 1px solid #000'>" + winRecord.getPlayers() + "</td> " +
-                                          "<td style='border-bottom: 1px solid #000'><u>" + winRecord.getNotes() + "</u></td>" +
-                                      "</tr>")
+                            "<td style='text-align:center; border-bottom: 1px solid #000'>" + winRecord.getDate() + "</td>" +
+                            "<td style='border-bottom: 1px solid #000'><b>" + winRecord.getWinner() + "</b></td>" +
+                            "<td style='text-align:center; border-bottom: 1px solid #000'><i>" + winRecord.getScore() + "</i></td>" +
+                            "<td style='border-bottom: 1px solid #000'>" + winRecord.getPlayers() + "</td> " +
+                            "<td style='border-bottom: 1px solid #000'><u>" + winRecord.getNotes() + "</u></td>" +
+                            "</tr>")
                     .collect(Collectors.joining());
 
             String htmlMessageWithTable = "<h2 style='text-align:center'>Записи перемог #" + (i / defaultAmountOfRecordsOn1Photo + 1) + "</h1>" +
                     "<table style='border: 1px solid; width: 600px'>" +
                     "<tr>" +
-                        "<td style='text-align:center; border: 1px solid'><b>Дата</b></td> " +
-                        "<td style='text-align:center; border: 1px solid'><b>Переможець</b></td> " +
-                        "<td style='text-align:center; border: 1px solid'><b>Переможні очки</b></td> " +
-                        "<td style='text-align:center; border: 1px solid'><b>Інші гравців</b></td> " +
-                        "<td style='text-align:center; border: 1px solid'><b>Примітки</b></td>" +
+                    "<td style='text-align:center; border: 1px solid'><b>Дата</b></td> " +
+                    "<td style='text-align:center; border: 1px solid'><b>Переможець</b></td> " +
+                    "<td style='text-align:center; border: 1px solid'><b>Переможні очки</b></td> " +
+                    "<td style='text-align:center; border: 1px solid'><b>Інші гравців</b></td> " +
+                    "<td style='text-align:center; border: 1px solid'><b>Примітки</b></td>" +
                     "</tr>" +
                     gameList +
                     "</table>";
