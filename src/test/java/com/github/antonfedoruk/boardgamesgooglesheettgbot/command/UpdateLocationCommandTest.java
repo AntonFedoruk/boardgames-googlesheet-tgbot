@@ -1,7 +1,8 @@
 package com.github.antonfedoruk.boardgamesgooglesheettgbot.command;
 
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.dto.Game;
-import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiException;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiIOException;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiOnExecuteException;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.GoogleApiService;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.service.SendBotMessageService;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,8 +12,6 @@ import org.mockito.Mockito;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,7 +31,7 @@ class UpdateLocationCommandTest {
     Long chatId;
 
     @BeforeEach
-    void init() {
+    void init() throws GoogleApiIOException, GoogleApiOnExecuteException {
         sendBotMessageService = Mockito.mock(SendBotMessageService.class);
         googleApiService = Mockito.mock(GoogleApiService.class);
         updateLocationCommand = new UpdateLocationCommand(sendBotMessageService, googleApiService);
@@ -40,23 +39,19 @@ class UpdateLocationCommandTest {
         newLocation = "new location";
         chatId = 1L;
 
-        try {
-            Map<String, Game> games = new HashMap<>();
-            Game game = new Game("1", "Inish", "2-5", "Nick", "At the office");
-            games.put("1", game);
-            Mockito.when(googleApiService.getGamesFromGoogleSheet()).thenReturn(games);
-        } catch (GoogleApiException e) {
-            e.printStackTrace();
-        }
+        Map<String, Game> games = new HashMap<>();
+        Game game = new Game("1", "Inish", "2-5", "Nick", "At the office");
+        games.put("1", game);
+        Mockito.when(googleApiService.getGamesFromGoogleSheet()).thenReturn(games);
     }
 
     @Test
     @DisplayName("Should send proper message when location updated")
-    void shouldSendProperMessageWhenLocationUpdated() throws GeneralSecurityException, IOException {
+    void shouldSendProperMessageWhenLocationUpdated() throws GoogleApiIOException, GoogleApiOnExecuteException {
         // given
         Mockito.when(googleApiService.updateGameLocation(gamesId, newLocation)).thenReturn(newLocation);
 
-        Update update = prepearedUpdate(UPDATE_LOCATION.getCommandName() + " "+ gamesId + " " + newLocation);
+        Update update = prepearedUpdate(UPDATE_LOCATION.getCommandName() + " " + gamesId + " " + newLocation);
         // when
         updateLocationCommand.execute(update);
         // then
@@ -66,7 +61,7 @@ class UpdateLocationCommandTest {
 
     @Test
     @DisplayName("Should send proper message when user enter command without any parameters")
-    void shouldSendProperMessageWhenUserEnterCommandWithoutAnyParameters() throws GeneralSecurityException, IOException {
+    void shouldSendProperMessageWhenUserEnterCommandWithoutAnyParameters(){
         // given
         Update update = prepearedUpdate(UPDATE_LOCATION.getCommandName());
         // when
@@ -78,7 +73,7 @@ class UpdateLocationCommandTest {
 
     @Test
     @DisplayName("Should send proper message when user enter command with larger games Id")
-    void shouldSendProperMessageWhenUserEnterCommandWithLargerGamesId() throws GeneralSecurityException, IOException {
+    void shouldSendProperMessageWhenUserEnterCommandWithLargerGamesId(){
         // given
         Update update = prepearedUpdate(UPDATE_LOCATION.getCommandName() + " 666 new location");
         // when
@@ -90,7 +85,7 @@ class UpdateLocationCommandTest {
 
     @Test
     @DisplayName("Should send proper message when user enter command with to long location length")
-    void shouldSendProperMessageWhenUserEnterCommandWithToLongLocationLength() throws GeneralSecurityException, IOException {
+    void shouldSendProperMessageWhenUserEnterCommandWithToLongLocationLength(){
         // given
         Update update = prepearedUpdate(UPDATE_LOCATION.getCommandName() + " 1 this is definitely longer then 20 symbols");
         // when
