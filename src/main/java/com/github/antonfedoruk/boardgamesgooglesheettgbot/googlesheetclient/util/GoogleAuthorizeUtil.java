@@ -1,6 +1,6 @@
 package com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.util;
 
-import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiException;
+import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleApiIOException;
 import com.github.antonfedoruk.boardgamesgooglesheettgbot.googlesheetclient.GoogleSheetClientImpl;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
@@ -40,16 +40,17 @@ public class GoogleAuthorizeUtil {
      * Creates an authorized Credential object. This will grant the application access to the Google Sheet.
      *
      * @return An authorized Credential object.
-     * @throws GoogleApiException If the credentials.json file cannot be found.
+     * @throws GoogleApiIOException If the credentials.json file cannot be found or TOKENS_DIRECTORY_PATH is wrong.
      */
-    public static GoogleAuthorizationCodeFlow getGoogleAuthorizationCodeFlow() throws GoogleApiException {
+    public static GoogleAuthorizationCodeFlow getGoogleAuthorizationCodeFlow() throws GoogleApiIOException {
         log.trace("Method getGoogleAuthorizationCodeFlow() invoked ...");
         try {
             log.trace("Load client secrets. From credential.json file out of /resources.");
             InputStream in = GoogleSheetClientImpl.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
             if (in == null) {
-                log.error("Credential file not found: '" + CREDENTIALS_FILE_PATH + "'.");
-                throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
+                String errorMsg = "Credential file not found: '" + CREDENTIALS_FILE_PATH + "'.";
+                log.error(errorMsg);
+                throw new GoogleApiIOException(errorMsg, new FileNotFoundException());
             }
             GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
@@ -63,8 +64,9 @@ public class GoogleAuthorizeUtil {
             log.trace("... method getGoogleAuthorizationCodeFlow() completed.");
             return flow;
         } catch (IOException e) {
-            log.error("IOException occurs during getting GoogleAuthorizationCodeFlow.", e);
-            throw new GoogleApiException("Failed to retrieve GoogleAuthorizationCodeFlow", e);
+            String errorMsg = "Failed to retrieve GoogleAuthorizationCodeFlow.";
+            log.error(errorMsg, e);
+            throw new GoogleApiIOException(errorMsg, e);
         }
     }
 }

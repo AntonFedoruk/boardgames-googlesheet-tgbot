@@ -1,5 +1,9 @@
 ## Release Notes
 
+### 0.8.4-SNAPSHOT
+*   GoogleApiException.class transformed into two different exceptions to display the StatusCode field;
+*   modified representation of the Readme.md bot link.
+
 ### 0.8.2-SNAPSHOT
 *   bugfix/ send message with win records once AWTError occurs.
 
