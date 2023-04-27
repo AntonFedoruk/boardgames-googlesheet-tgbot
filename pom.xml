@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.github.antonfedoruk</groupId>
 	<artifactId>boardgames-googlesheet-tgbot</artifactId>
-	<version>0.8.1-SNAPSHOT</version>
+	<version>0.8.2-SNAPSHOT</version>
 	<name>Board games Google Sheet TelegramBot</name>
 	<description>Telegram bot for displaying board games info from Google Sheets</description>
 	<properties>

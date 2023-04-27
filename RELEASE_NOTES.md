@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 0.8.2-SNAPSHOT
+*   bugfix/ send message with win records once AWTError occurs.
+
 ### 0.8.1-SNAPSHOT
 *   improved Readme.md file.
 
